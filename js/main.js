@@ -5,16 +5,16 @@ let selectedWord = null;
 const pairs = [
   { emoji: '🍎', word: 'Manzana' },
   { emoji: '🚗', word: 'Carro' },
-  { emoji: '🐶', word: 'Perro' },
+  { emoji: '🐗', word: 'Perro' },
   { emoji: '🌞', word: 'Sol' },
   { emoji: '📖', word: 'Libro' }
 ];
 const users = {
-  Tony: { pin: '1984', avatar: 'assets/images/avatar_tony.png' },
-  Mina: { pin: '1982', avatar: 'assets/images/avatar_mina.png' },
-  Sorato: { pin: '2014', avatar: 'assets/images/avatar_sorato.png' },
-  Kaito: { pin: '2015', avatar: 'assets/images/avatar_kaito.png' },
-  Maria: { pin: '2019', avatar: 'assets/images/avatar_maria.png' }
+  Tony: { pin: '1111', avatar: 'assets/images/avatar_tony.png' },
+  Mina: { pin: '2222', avatar: 'assets/images/avatar_mina.png' },
+  Sorato: { pin: '3333', avatar: 'assets/images/avatar_sorato.png' },
+  Kaito: { pin: '4444', avatar: 'assets/images/avatar_kaito.png' },
+  Maria: { pin: '5555', avatar: 'assets/images/avatar_maria.png' }
 };
 let currentUser = null;
 
@@ -69,6 +69,7 @@ function startGame() {
     box.addEventListener('click', () => handleBoxClick(box));
     wordColumn.appendChild(box);
   });
+  updateLeaderboard(0);
 }
 
 function handleBoxClick(box) {
@@ -118,7 +119,7 @@ function checkMatch() {
       playSound('correct');
       setTimeout(() => {
         const messageDiv = document.getElementById('messages');
-        messageDiv.innerHTML = `<img src="https://raw.githubusercontent.com/chatterbox-house/NandoMode/main/assets/images/cat_sprite.png" alt="Correct"> Correct!`;
+        messageDiv.innerHTML = `<img src="https://raw.githubusercontent.com/your-username/NandoMode/main/assets/images/cat_sprite.png" alt="Correct"> Correct!`;
         setTimeout(() => { messageDiv.innerHTML = ''; }, 1000);
       }, 300);
       if (score === pairs.length) {
@@ -127,10 +128,10 @@ function checkMatch() {
     } else {
       selectedEmoji.classList.add('incorrect');
       selectedWord.classList.add('incorrect');
-      playSound(null);
+      playSound('incorrect');
       setTimeout(() => {
         const messageDiv = document.getElementById('messages');
-        messageDiv.innerHTML = `<img src="https://raw.githubusercontent.com/chatterbox-house/NandoMode/main/assets/images/sad_sprite.png" alt="Incorrect"> Try again!`;
+        messageDiv.innerHTML = `<img src="https://raw.githubusercontent.com/your-username/NandoMode/main/assets/images/sad_sprite.png" alt="Incorrect"> Try again!`;
         selectedEmoji.classList.remove('selected', 'incorrect');
         selectedWord.classList.remove('selected', 'incorrect');
         selectedEmoji = null;
@@ -146,8 +147,21 @@ function showEndScreen() {
   document.getElementById('score').style.display = 'none';
   document.getElementById('progressBar').style.display = 'none';
   document.getElementById('endScreen').style.display = 'block';
+  document.getElementById('buttons').style.display = 'none';
   startConfetti();
   updateLeaderboard(score);
+  document.getElementById('playBtn').addEventListener('click', () => {
+    document.getElementById('endScreen').style.display = 'none';
+    document.getElementById('buttons').style.display = 'block';
+    document.getElementById('leaderboard').style.display = 'block';
+    stopConfetti();
+  });
+  document.getElementById('finishEndBtn').addEventListener('click', () => {
+    document.getElementById('endScreen').style.display = 'none';
+    document.getElementById('loginSection').style.display = 'block';
+    document.getElementById('leaderboard').style.display = 'none';
+    stopConfetti();
+  });
 }
 
 document.getElementById('themeToggle').addEventListener('click', () => {
@@ -155,8 +169,19 @@ document.getElementById('themeToggle').addEventListener('click', () => {
   localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
 });
 
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  currentUser = null;
+  document.getElementById('loginSection').style.display = 'block';
+  document.getElementById('buttons').style.display = 'none';
+  document.getElementById('leaderboard').style.display = 'none';
+  document.getElementById('container').style.display = 'none';
+  document.getElementById('score').style.display = 'none';
+  document.getElementById('progressBar').style.display = 'none';
+});
+
 window.addEventListener('load', () => {
   if (localStorage.getItem('theme') === 'dark') {
     document.body.classList.add('dark');
   }
+  updateLeaderboard(0);
 });
