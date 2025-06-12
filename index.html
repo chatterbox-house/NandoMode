@@ -2,13 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Spanish Vocab Trainer</title>
   <style>
     body { font-family: sans-serif; max-width: 500px; margin: 2em auto; }
     .hidden { display: none; }
-    .box { display:inline-block; padding: .5em; margin:.25em; border:1px solid #333; cursor:pointer; }
-    .matched { background: #cfc; }
+    .box { display: inline-block; padding: .5em; margin: .25em; border: 1px solid #333; cursor: pointer; }
+    .selected { outline: 2px solid orange; }
+    .matched { background: #cfc; cursor: default; }
     .incorrect { background: #fcc; }
     .highlight { box-shadow: 0 0 5px gold; }
     #progressBar { width:100%; height:1em; background:#eee; margin:1em 0; }
@@ -17,20 +18,23 @@
 </head>
 <body>
 
-  <!-- LOGIN -->
+  <!-- LOGIN SCREEN -->
   <div id="loginSection">
     <h2>Bienvenido</h2>
     <select id="username">
       <option value="">— Selecciona usuario —</option>
-      <option>Tony</option><option>Mina</option><option>Sorato</option>
-      <option>Kaito</option><option>Maria</option>
+      <option value="Tony">Tony</option>
+      <option value="Mina">Mina</option>
+      <option value="Sorato">Sorato</option>
+      <option value="Kaito">Kaito</option>
+      <option value="Maria">Maria</option>
     </select>
     <input id="pin" type="password" placeholder="PIN" />
     <button id="loginBtn">Entrar</button>
     <div id="loginError" style="color:red"></div>
   </div>
 
-  <!-- GAME -->
+  <!-- CONTROLS -->
   <div id="buttons" class="hidden">
     <button id="startBtn">Comenzar</button>
     <button id="finishBtn" class="hidden">Terminar</button>
@@ -38,6 +42,7 @@
     <div id="messages"></div>
   </div>
 
+  <!-- GAME AREA -->
   <div id="container" class="hidden">
     <div id="emojiColumn"></div>
     <div id="wordColumn"></div>
@@ -47,12 +52,12 @@
     <ul id="leaderboardList"></ul>
   </div>
 
-  <!-- 1) Load your vocab first -->
+  <!-- 1) Your vocab must load first and define window.vocab -->
   <script src="vocab.js"></script>
-  <!-- 2) Then the trainer code -->
+  <!-- 2) Inline trainer code -->
   <script>
-    // index.html (inline trainer, so you only need 2 files)
-    console.log("vocab is", window.vocab);
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("window.vocab:", window.vocab);
 
     class SpanishVocabTrainer {
       constructor() {
@@ -65,172 +70,198 @@
         };
         this.goodLuck = ["¡Listo, pixelero! 🎮","¡A por los puntos! ⭐","¡Tú puedes! 💪"];
         this.wellDone = ["¡Nivel completado! ✅","¡Eres un pro! 🏆"];
-        this.matched = new Set();
-        this.errorSet = new Set();
-        this.currVocab = [];
-        this.selEmoji = null;
-        this._bind();
-        this._loadData();
+        this._bindElements();
+        this._loadUserData();
         this._wireEvents();
+        this._tryRestoreSession();
       }
 
-      _bind() {
-        const $ = id=>document.getElementById(id);
-        this.loginSec = $('loginSection');
-        this.userSel   = $('username');
-        this.pinInput  = $('pin');
-        this.loginBtn  = $('loginBtn');
-        this.loginErr  = $('loginError');
-        this.buttons   = $('buttons');
-        this.startBtn  = $('startBtn');
-        this.finishBtn = $('finishBtn');
-        this.logoutBtn = $('logoutBtn');
-        this.msgs      = $('messages');
-        this.container = $('container');
-        this.emojiCol  = $('emojiColumn');
-        this.wordCol   = $('wordColumn');
-        this.scoreDisp = $('score');
-        this.prog      = $('progress');
-        this.lbList    = $('leaderboardList');
+      _bindElements() {
+        const $ = id => document.getElementById(id);
+        this.loginSection = $("loginSection");
+        this.userSel      = $("username");
+        this.pinInput     = $("pin");
+        this.loginBtn     = $("loginBtn");
+        this.loginErr     = $("loginError");
+        this.buttons      = $("buttons");
+        this.startBtn     = $("startBtn");
+        this.finishBtn    = $("finishBtn");
+        this.logoutBtn    = $("logoutBtn");
+        this.messages     = $("messages");
+        this.container    = $("container");
+        this.emojiCol     = $("emojiColumn");
+        this.wordCol      = $("wordColumn");
+        this.scoreDisp    = $("score");
+        this.progressBar  = $("progress");
+        this.leaderboard  = $("leaderboardList");
       }
 
       _wireEvents() {
-        this.loginBtn .onclick = ()=>this._login();
-        this.startBtn .onclick = ()=>this.startQuiz();
+        this.loginBtn.onclick  = ()=>this._doLogin();
+        this.pinInput.onkeypress = e=>{ if(e.key==="Enter") this._doLogin(); };
+        this.startBtn.onclick  = ()=>this.startQuiz();
         this.finishBtn.onclick = ()=>this.finishQuiz();
-        this.logoutBtn.onclick = ()=>this._logout();
-        this.pinInput.onkeypress = e=>{ if(e.key==='Enter') this._login(); };
+        this.logoutBtn.onclick = ()=>this._doLogout();
       }
 
-      _saveData() {
-        localStorage.setItem('users', JSON.stringify(this.users));
+      _saveUserData() {
+        localStorage.setItem("users", JSON.stringify(this.users));
       }
 
-      _loadData(){
-        const s = localStorage.getItem('users');
-        if(s) Object.assign(this.users, JSON.parse(s));
+      _loadUserData() {
+        try {
+          const raw = localStorage.getItem("users");
+          if (raw) Object.assign(this.users, JSON.parse(raw));
+        } catch {}
       }
 
-      _login(){
-        const u=this.userSel.value, p=this.pinInput.value.trim();
-        if(!u){ this.loginErr.textContent="Selecciona usuario"; return; }
-        if(!this.users[u]||this.users[u].pin!==p){
-          this.loginErr.textContent="PIN inválido"; return;
+      _tryRestoreSession() {
+        const u = sessionStorage.getItem("currentUser");
+        if (u && this.users[u]) {
+          this.currentUser = u;
+          this.userSel.value = u;
+          this._showGameControls();
         }
-        this.loginErr.textContent="";
-        this.currentUser=u;
-        sessionStorage.setItem('currentUser',u);
-        this.loginSec.classList.add('hidden');
-        this.buttons.classList.remove('hidden');
+      }
+
+      _doLogin() {
+        const u = this.userSel.value, p = this.pinInput.value.trim();
+        if (!u)    return this.loginErr.textContent="Selecciona un usuario.";
+        if (!this.users[u] || this.users[u].pin !== p) {
+          return this.loginErr.textContent="PIN inválido.";
+        }
+        this.loginErr.textContent = "";
+        this.currentUser = u;
+        sessionStorage.setItem("currentUser", u);
+        this._showGameControls();
+      }
+
+      _showGameControls() {
+        this.loginSection.classList.add("hidden");
+        this.buttons.classList.remove("hidden");
         this._updateLeaderboard();
       }
 
-      startQuiz(){
-        if(!window.vocab||!window.vocab.length){
-          this.msgs.textContent="Error: vocab.js no cargado.";
+      startQuiz() {
+        if (!window.vocab || window.vocab.length === 0) {
+          this.messages.textContent = "Error: vocab.js no cargado.";
           return;
         }
-        this.matched.clear();
-        this.errorSet.clear();
-        this.currVocab = this._pickWords();
-        this._render();
+        this.matched = new Set();
+        this.errors  = new Set();
+        this.currentVocab = this._selectWords();
         this.scoreDisp.textContent = this.users[this.currentUser].score;
-        this.prog.style.width = '0%';
-        this.finishBtn.classList.add('hidden');
-        this.msgs.textContent = this.goodLuck[Math.random()*this.goodLuck.length|0];
+        this.progressBar.style.width = "0%";
+        this.finishBtn.classList.add("hidden");
+        this._renderQuiz();
+        this.messages.textContent = this.goodLuck[Math.random()*this.goodLuck.length|0];
       }
 
-      _pickWords(){
+      _selectWords() {
         const user = this.users[this.currentUser];
-        const avail = window.vocab.filter(v=>(user.mastered[v.word]||0)<10);
-        const pick = this._shuffle(avail).slice(0,5);
+        const avail = window.vocab.filter(v=> (user.mastered[v.word]||0) < 10);
+        const pick  = this._shuffle(avail).slice(0,5);
         user.lastWords = pick.map(x=>x.word);
-        this._saveData();
+        this._saveUserData();
         return pick;
       }
 
-      _render(){
+      _renderQuiz() {
         // emojis
-        this.emojiCol.innerHTML='';
-        this.currVocab.forEach(({emoji,word})=>{
-          const d = document.createElement('div');
-          d.className='box'; d.textContent=emoji; d.dataset.word=word;
-          d.onclick = ()=>this._selEmoji(d,word);
+        this.emojiCol.innerHTML = "";
+        this.currentVocab.forEach(({emoji,word})=>{
+          const d = document.createElement("div");
+          d.className = "box";
+          d.textContent = emoji;
+          d.dataset.word = word;
+          d.onclick = ()=> this._pickEmoji(d,word);
           this.emojiCol.appendChild(d);
         });
         // words
-        this.wordCol.innerHTML='';
-        this._shuffle(this.currVocab).forEach(({word})=>{
-          const d = document.createElement('div');
-          d.className='box wordBox'; d.textContent=word;
-          d.onclick = ()=>this._selWord(d,word);
+        this.wordCol.innerHTML = "";
+        this._shuffle(this.currentVocab).forEach(({word})=>{
+          const d = document.createElement("div");
+          d.className = "box wordBox";
+          d.textContent = word;
+          d.onclick = ()=> this._pickWord(d,word);
           this.wordCol.appendChild(d);
         });
-        this.container.classList.remove('hidden');
+        this.container.classList.remove("hidden");
       }
 
-      _selEmoji(div,word){
-        if(this.matched.has(word)) return;
-        if(this.selEmoji===div){ div.classList.remove('selected'); this.selEmoji=null; return; }
-        this.emojiCol.querySelectorAll('.selected').forEach(x=>x.classList.remove('selected'));
-        div.classList.add('selected'); this.selEmoji=div;
-        new SpeechSynthesisUtterance(word) && speechSynthesis.speak(new SpeechSynthesisUtterance(word));
+      _pickEmoji(div,word) {
+        if (this.matched.has(word)) return;
+        this.emojiCol.querySelectorAll(".selected")
+            .forEach(x=>x.classList.remove("selected"));
+        div.classList.add("selected");
+        this.selectedEmoji = div;
+        speechSynthesis.speak(new SpeechSynthesisUtterance(word));
       }
 
-      _selWord(div,word){
-        if(!this.selEmoji) return;
-        const guess=this.selEmoji.dataset.word;
-        if(guess===word) this._correct(div,word);
-        else this._wrong(div,word);
+      _pickWord(div,word) {
+        if (!this.selectedEmoji) return;
+        const guess = this.selectedEmoji.dataset.word;
+        if (guess === word) this._handleCorrect(div,word);
+        else                  this._handleWrong(div);
       }
 
-      _correct(div,word){
+      _handleCorrect(div,word) {
         this.matched.add(word);
-        this.selEmoji.classList.replace('selected','matched');
-        div.classList.add('matched','highlight');
-        const u=this.users[this.currentUser];
-        u.score++; u.mastered[word]=(u.mastered[word]||0)+1;
-        this._saveData();
-        this.scoreDisp.textContent = u.score;
-        const pct = this.matched.size/this.currVocab.length*100;
-        this.prog.style.width = pct+'%';
-        this.msgs.textContent="¡Correcto! 🎉";
-        if(this.matched.size===this.currVocab.length){
-          this.finishBtn.classList.remove('hidden');
+        const user = this.users[this.currentUser];
+        if (!this.errors.has(word)) {
+          user.score++;
+          user.mastered[word] = (user.mastered[word]||0)+1;
+          this._saveUserData();
         }
-        this.selEmoji=null;
+        this.scoreDisp.textContent = user.score;
+        this.selectedEmoji.classList.replace("selected","matched");
+        div.classList.add("matched","highlight");
+        this.selectedEmoji = null;
+        // update progress bar
+        const pct = this.matched.size/this.currentVocab.length*100;
+        this.progressBar.style.width = pct+"%";
+        this.messages.textContent = "¡Correcto! 🎉";
+        if (this.matched.size === this.currentVocab.length) {
+          this.finishBtn.classList.remove("hidden");
+        }
       }
 
-      _wrong(div){
-        div.classList.add('incorrect');
-        setTimeout(()=>div.classList.remove('incorrect'),300);
-        this.msgs.textContent="Intenta otra vez…";
+      _handleWrong(div) {
+        this.errors.add(div.textContent);
+        div.classList.add("incorrect");
+        setTimeout(()=>div.classList.remove("incorrect"),300);
+        this.messages.textContent = "Intenta otra vez…";
       }
 
-      finishQuiz(){
-        this.msgs.textContent = this.wellDone[Math.random()*this.wellDone.length|0];
+      finishQuiz() {
+        this.messages.textContent = this.wellDone[Math.random()*this.wellDone.length|0];
         this._updateLeaderboard();
       }
 
-      _updateLeaderboard(){
+      _updateLeaderboard() {
         const html = Object.entries(this.users)
           .sort((a,b)=>b[1].score - a[1].score)
-          .map(([u,d])=>`<li>${u}: ${d.score}</li>`).join('');
-        this.lbList.innerHTML = html;
+          .map(([u,d])=>`<li>${u}: ${d.score}</li>`).join("");
+        this.leaderboard.innerHTML = html;
       }
 
-      _logout(){
-        this._saveData();
-        sessionStorage.removeItem('currentUser');
+      _doLogout() {
+        this._saveUserData();
+        sessionStorage.removeItem("currentUser");
         location.reload();
       }
 
-      _shuffle(a){
-        for(let i=a.length-1;i>0;i--){
-          const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];
+      _shuffle(arr) {
+        for (let i=arr.length-1;i>0;i--) {
+          const j = Math.random()*(i+1)|0;
+          [arr[i],arr[j]] = [arr[j],arr[i]];
         }
-        return a;
+        return arr;
       }
     }
 
-    // instantiate once DOM is ready
+    new SpanishVocabTrainer();
+  });
+  </script>
+</body>
+</html>
