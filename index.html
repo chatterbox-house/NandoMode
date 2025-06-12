@@ -2,15 +2,15 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Entrenador Retro de Vocabulario</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NandoMode – Vocab Retro Trainer</title>
   <link rel="stylesheet" href="style.css">
-  <!-- 8-bit pixel font -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body data-theme="light">
   <header>
-    <h1>🇪🇸 Vocab Retro Trainer</h1>
+    <div class="logo"><img src="fernando_logo.png" alt="Fernando"></div>
+    <h1>NandoMode</h1>
     <button id="themeToggle" title="Toggle Dark/Light">🕹️</button>
   </header>
 
@@ -20,7 +20,7 @@
       <h2>Bienvenido</h2>
       <div class="login-controls">
         <select id="userSelect">
-          <option value="">— Selecciona usuario —</option>
+          <option value="">— Usuario —</option>
           <option value="Tony">Tony</option>
           <option value="Mina">Mina</option>
           <option value="Sorato">Sorato</option>
@@ -57,13 +57,20 @@
         <ul id="leaderList"></ul>
       </div>
     </section>
+
+    <!-- VICTORY -->
+    <section id="victoryScreen" class="hidden">
+      <img src="fernando_cheer.png" alt="¡Bien Hecho, Campeón!" id="victoryImg">
+      <div id="victoryMessage"></div>
+      <div class="controls">
+        <button id="continueBtn">Continuar</button>
+        <button id="quitBtn">Salir</button>
+      </div>
+    </section>
   </main>
 
-  <!-- confetti lib -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- your vocabulary -->
   <script src="vocab.js"></script>
-  <!-- game logic -->
   <script src="app.js"></script>
 </body>
 </html>
