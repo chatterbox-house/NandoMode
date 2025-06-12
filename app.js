@@ -72,7 +72,6 @@ class SpanishVocabTrainer {
       themeToggle: document.getElementById("themeToggle")
     };
 
-    // Validate required elements
     const requiredElements = ['loginBtn', 'usernameSelect', 'pinInput', 'startBtn'];
     const missing = requiredElements.filter(id => !this.elements[id]);
     if (missing.length > 0) {
@@ -87,12 +86,10 @@ class SpanishVocabTrainer {
     this.elements.logoutBtn.addEventListener("click", () => this.logoutUser());
     this.elements.themeToggle.addEventListener("click", () => this.toggleTheme());
     
-    // Enter key support for login
     this.elements.pinInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter") this.handleLogin();
     });
 
-    // Clear login error when user types
     this.elements.pinInput.addEventListener("input", () => {
       this.elements.loginError.textContent = "";
     });
@@ -171,7 +168,6 @@ class SpanishVocabTrainer {
   }
 
   startQuiz() {
-    // Check if vocab is available
     if (typeof window.vocab === "undefined" || !window.vocab || window.vocab.length === 0) {
       this.elements.messages.textContent = "Error: No vocabulary loaded.";
       return;
@@ -182,23 +178,19 @@ class SpanishVocabTrainer {
     this.quizStarted = true;
     this.selectedEmoji = null;
 
-    // Show game elements
     this.elements.scoreDisplay.classList.remove("hidden");
     this.elements.progressBar.classList.remove("hidden");
     this.elements.container.classList.remove("hidden");
     this.elements.startBtn.classList.add("hidden");
     this.elements.finishBtn.classList.add("hidden");
 
-    // Update displays
     this.elements.scoreDisplay.textContent = `Matches: ${this.users[this.currentUser].score}`;
     this.elements.progress.style.width = "0%";
 
-    // Show encouraging message
     const phrase = this.goodLuckPhrases[Math.floor(Math.random() * this.goodLuckPhrases.length)];
     this.elements.messages.textContent = phrase;
     this.speakText(phrase);
 
-    // Setup quiz
     this.currentVocab = this.selectQuizWords();
     this.setupEmojiBoxes();
     this.setupWordBoxes();
@@ -389,4 +381,14 @@ class SpanishVocabTrainer {
     this.showLoginInterface();
   }
 
-  saveUserData
+  saveUserData() {
+    try {
+      localStorage.setItem("users", JSON.stringify(this.users));
+    } catch (e) {
+      console.error("Failed to save user data:", e);
+    }
+  }
+
+  loadUserData() {
+    try {
+      const saved = localStorage.
