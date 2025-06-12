@@ -61,17 +61,23 @@ class SpanishVocabTrainer {
     try { this.audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
     catch { this.audioCtx = null; }
   }
-  _playTone(freq, dur=0.2) {
+  _playTone(freq, duration = 0.2, type = "square") {
     if (!this.audioCtx) return;
-    const osc = this.audioCtx.createOscillator();
+    const osc  = this.audioCtx.createOscillator();
     const gain = this.audioCtx.createGain();
+    osc.type = type;
     osc.frequency.value = freq;
-    osc.connect(gain); gain.connect(this.audioCtx.destination);
+    osc.connect(gain);
+    gain.connect(this.audioCtx.destination);
     osc.start();
     gain.gain.setValueAtTime(1, this.audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime+dur);
-    osc.stop(this.audioCtx.currentTime+dur);
+    gain.gain.exponentialRampToValueAtTime(
+      0.001,
+      this.audioCtx.currentTime + duration
+    );
+    osc.stop(this.audioCtx.currentTime + duration);
   }
+
   _soundCorrect() {
     // single clean ping
     this._playTone(880, 0.1, "square");
