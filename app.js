@@ -71,12 +71,6 @@ class SpanishVocabTrainer {
       progress: document.getElementById("progress"),
       themeToggle: document.getElementById("themeToggle")
     };
-
-    const requiredElements = ['loginBtn', 'usernameSelect', 'pinInput', 'startBtn'];
-    const missing = requiredElements.filter(id => !this.elements[id]);
-    if (missing.length > 0) {
-      throw new Error(`Missing required elements: ${missing.join(', ')}`);
-    }
   }
 
   setupEventListeners() {
@@ -201,24 +195,13 @@ class SpanishVocabTrainer {
     user.mastered = user.mastered || {};
     user.lastWords = user.lastWords || [];
 
-    const errorWordsLastSession = user.lastWords.filter(word => this.errorWords.has(word));
     const availableWords = window.vocab.filter(v => (user.mastered[v.word] || 0) < 10);
-
-    let holdovers = errorWordsLastSession.length > 0
-      ? errorWordsLastSession.slice(0, 2)
-      : user.lastWords.filter(word => availableWords.some(v => v.word === word)).slice(0, 2);
-
-    const remainingCount = Math.min(5 - holdovers.length, availableWords.length);
-    const newWords = this.shuffle([...availableWords])
-      .filter(v => !holdovers.includes(v.word))
-      .slice(0, remainingCount)
-      .map(v => v.word);
-
-    const selectedWords = [...holdovers, ...newWords];
-    user.lastWords = selectedWords;
+    const selectedWords = this.shuffle([...availableWords]).slice(0, 5);
+    
+    user.lastWords = selectedWords.map(v => v.word);
     this.saveUserData();
 
-    return window.vocab.filter(v => selectedWords.includes(v.word));
+    return selectedWords;
   }
 
   setupEmojiBoxes() {
@@ -391,4 +374,29 @@ class SpanishVocabTrainer {
 
   loadUserData() {
     try {
-      const saved = localStorage.
+      const saved = localStorage.getItem("users");
+      if (saved) {
+        const userData = JSON.parse(saved);
+        Object.keys(this.users).forEach(user => {
+          if (userData[user]) {
+            this.users[user] = { ...this.users[user], ...userData[user] };
+          }
+        });
+      }
+    } catch (e) {
+      console.error("Failed to load user data:", e);
+    }
+  }
+
+  shuffle(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
+  speakText(text, callback) {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtte
