@@ -1,3 +1,6 @@
+console.log("window.vocab is:", window.vocab);
+
+
 class SpanishVocabTrainer {
   constructor() {
     this.users = {
