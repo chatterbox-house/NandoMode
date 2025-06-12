@@ -1,402 +1,215 @@
 class SpanishVocabTrainer {
   constructor() {
     this.users = {
-      Tony: { pin: "1984", score: 0, mastered: {}, lastWords: [] },
-      Mina: { pin: "1982", score: 0, mastered: {}, lastWords: [] },
-      Sorato: { pin: "2014", score: 0, mastered: {}, lastWords: [] },
+      Tony:  { pin: "1984", score: 0, mastered: {}, lastWords: [] },
+      Mina:  { pin: "1982", score: 0, mastered: {}, lastWords: [] },
+      Sorato:{ pin: "2014", score: 0, mastered: {}, lastWords: [] },
       Kaito: { pin: "2015", score: 0, mastered: {}, lastWords: [] },
       Maria: { pin: "2019", score: 0, mastered: {}, lastWords: [] }
     };
-
-    this.goodLuckPhrases = [
-      "¡Listo, pixelero! 🎮",
-      "¡A por los puntos! ⭐",
-      "¡Tú puedes, 8-bit! 💪",
-      "¡Vamos, héroe! 🦸",
-      "¡Modo juego ON! 🚀"
-    ];
-
-    this.wellDonePhrases = [
-      "¡Eres un pro, pixel! 🏆",
-      "¡Nivel completado! ✅",
-      "¡Súper 8-bit! 🌟",
-      "¡Victoria retro! 🎉",
-      "¡Campeón pixelado! 👑"
-    ];
-
+    this.goodLuckPhrases = ["¡Listo, pixelero! 🎮","¡A por los puntos! ⭐","¡Tú puedes! 💪"];
+    this.wellDonePhrases = ["¡Nivel completado! ✅","¡Eres un pro! 🏆"];
     this.matched = new Set();
-    this.score = 0;
-    this.quizStarted = false;
-    this.currentUser = null;
-    this.selectedEmoji = null;
     this.errorWords = new Set();
     this.currentVocab = [];
+    this.selectedEmoji = null;
     this.audioContext = null;
 
-    this.initializeAudio();
-    this.loadElements();
-    this.loadUserData();
-    this.setupEventListeners();
-    this.initializeTheme();
-    this.checkSavedSession();
+    this._bindElements();
+    this._loadUserData();
+    this._setupListeners();
+    this._initAudio();
+    this._checkSession();
   }
 
-  initializeAudio() {
-    try {
-      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    } catch (e) {
-      console.warn("Web Audio API not supported:", e);
+  _bindElements() {
+    const get = id => document.getElementById(id);
+    this.emojis    = get("emojiColumn");
+    this.words     = get("wordColumn");
+    this.scoreDisp = get("score");
+    this.msgs      = get("messages");
+    this.loginBtn  = get("loginBtn");
+    this.startBtn  = get("startBtn");
+    this.finishBtn = get("finishBtn");
+    this.logoutBtn = get("logoutBtn");
+    this.userSel   = get("username");
+    this.pinInput  = get("pin");
+    this.loginErr  = get("loginError");
+    this.lbList    = get("leaderboardList");
+    this.themeTog  = get("themeToggle");
+    this.progBar   = get("progress");
+  }
+
+  _setupListeners() {
+    this.loginBtn .addEventListener("click", () => this._login());
+    this.startBtn .addEventListener("click", () => this.startQuiz());
+    this.finishBtn.addEventListener("click", () => this.finishQuiz());
+    this.logoutBtn.addEventListener("click", () => this.logout());
+    this.themeTog .addEventListener("click", () => this._toggleTheme());
+    this.pinInput .addEventListener("keypress", e => { if (e.key==="Enter") this._login(); });
+  }
+
+  _initAudio() {
+    try { this.audioContext = new (window.AudioContext||window.webkitAudioContext)(); }
+    catch(e){ console.warn("Audio not supported",e); }
+  }
+
+  _checkSession() {
+    const u = sessionStorage.getItem("currentUser");
+    if (u && this.users[u]) {
+      this.currentUser = u;
+      this.userSel.value = u;
+      this._showGame();
     }
   }
 
-  loadElements() {
-    this.elements = {
-      emojiColumn: document.getElementById("emojiColumn"),
-      wordColumn: document.getElementById("wordColumn"),
-      scoreDisplay: document.getElementById("score"),
-      messages: document.getElementById("messages"),
-      startBtn: document.getElementById("startBtn"),
-      finishBtn: document.getElementById("finishBtn"),
-      logoutBtn: document.getElementById("logoutBtn"),
-      container: document.getElementById("container"),
-      loginSection: document.getElementById("loginSection"),
-      loginBtn: document.getElementById("loginBtn"),
-      usernameSelect: document.getElementById("username"),
-      pinInput: document.getElementById("pin"),
-      loginError: document.getElementById("loginError"),
-      buttonsDiv: document.getElementById("buttons"),
-      leaderboardDiv: document.getElementById("leaderboard"),
-      leaderboardList: document.getElementById("leaderboardList"),
-      progressBar: document.getElementById("progressBar"),
-      progress: document.getElementById("progress"),
-      themeToggle: document.getElementById("themeToggle")
-    };
+  _login() {
+    const u = this.userSel.value, p = this.pinInput.value.trim();
+    if (!u) return this.loginErr.textContent="Selecciona usuario.";
+    if (!this.users[u] || this.users[u].pin!==p) return this.loginErr.textContent="PIN inválido.";
+    this.loginErr.textContent="";
+    this.currentUser = u;
+    sessionStorage.setItem("currentUser",u);
+    this._showGame();
   }
 
-  setupEventListeners() {
-    this.elements.loginBtn.addEventListener("click", () => this.handleLogin());
-    this.elements.startBtn.addEventListener("click", () => this.startQuiz());
-    this.elements.finishBtn.addEventListener("click", () => this.finishQuiz());
-    this.elements.logoutBtn.addEventListener("click", () => this.logoutUser());
-    this.elements.themeToggle.addEventListener("click", () => this.toggleTheme());
-    
-    this.elements.pinInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") this.handleLogin();
-    });
-
-    this.elements.pinInput.addEventListener("input", () => {
-      this.elements.loginError.textContent = "";
-    });
-    
-    this.elements.usernameSelect.addEventListener("change", () => {
-      this.elements.loginError.textContent = "";
-    });
-  }
-
-  initializeTheme() {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      document.body.classList.add("dark");
-    }
-  }
-
-  toggleTheme() {
-    document.body.classList.toggle("dark");
-    const isDark = document.body.classList.contains("dark");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-  }
-
-  checkSavedSession() {
-    const savedUser = sessionStorage.getItem("currentUser");
-    if (savedUser && this.users[savedUser]) {
-      this.currentUser = savedUser;
-      this.elements.usernameSelect.value = this.currentUser;
-      this.showGameInterface();
-    } else {
-      this.showLoginInterface();
-    }
-  }
-
-  handleLogin() {
-    const username = this.elements.usernameSelect.value;
-    const pin = this.elements.pinInput.value.trim();
-
-    if (!username) {
-      this.elements.loginError.textContent = "Por favor, selecciona un usuario.";
-      return;
-    }
-
-    if (!this.users[username]) {
-      this.elements.loginError.textContent = "Usuario no encontrado.";
-      return;
-    }
-
-    if (this.users[username].pin !== pin) {
-      this.elements.loginError.textContent = "PIN incorrecto. Inténtalo de nuevo.";
-      return;
-    }
-
-    this.elements.loginError.textContent = "";
-    this.currentUser = username;
-    sessionStorage.setItem("currentUser", this.currentUser);
-    this.showGameInterface();
-  }
-
-  showLoginInterface() {
-    this.elements.loginSection.classList.remove("hidden");
-    this.elements.buttonsDiv.classList.add("hidden");
-    this.elements.container.classList.add("hidden");
-    this.elements.scoreDisplay.classList.add("hidden");
-    this.elements.progressBar.classList.add("hidden");
-    this.elements.leaderboardDiv.classList.add("hidden");
-    this.elements.messages.textContent = "";
-  }
-
-  showGameInterface() {
-    this.elements.loginSection.classList.add("hidden");
-    this.elements.buttonsDiv.classList.remove("hidden");
-    this.elements.startBtn.classList.remove("hidden");
-    this.elements.finishBtn.classList.add("hidden");
-    this.elements.logoutBtn.classList.remove("hidden");
-    this.updateLeaderboard();
+  _showGame() {
+    document.getElementById("loginSection" ).classList.add("hidden");
+    document.getElementById("buttons"      ).classList.remove("hidden");
+    this._updateLeaderboard();
   }
 
   startQuiz() {
-    if (typeof window.vocab === "undefined" || !window.vocab || window.vocab.length === 0) {
-      this.elements.messages.textContent = "Error: No vocabulary loaded.";
-      return;
+    if (!window.vocab || !vocab.length) {
+      return this.msgs.textContent="Error: vocab.js no cargado.";
     }
-
-    this.matched = new Set();
-    this.errorWords = new Set();
-    this.quizStarted = true;
-    this.selectedEmoji = null;
-
-    this.elements.scoreDisplay.classList.remove("hidden");
-    this.elements.progressBar.classList.remove("hidden");
-    this.elements.container.classList.remove("hidden");
-    this.elements.startBtn.classList.add("hidden");
-    this.elements.finishBtn.classList.add("hidden");
-
-    this.elements.scoreDisplay.textContent = `Matches: ${this.users[this.currentUser].score}`;
-    this.elements.progress.style.width = "0%";
-
-    const phrase = this.goodLuckPhrases[Math.floor(Math.random() * this.goodLuckPhrases.length)];
-    this.elements.messages.textContent = phrase;
-    this.speakText(phrase);
-
-    this.currentVocab = this.selectQuizWords();
-    this.setupEmojiBoxes();
-    this.setupWordBoxes();
+    this.matched.clear();
+    this.errorWords.clear();
+    this.currentVocab = this._pickWords();
+    this._renderEmojis();
+    this._renderWords();
+    this.scoreDisp.textContent = `Puntos: ${this.users[this.currentUser].score}`;
+    this.progBar.style.width="0%";
+    this.msgs.textContent = this.goodLuckPhrases[Math.random()*this.goodLuckPhrases.length|0];
   }
 
-  selectQuizWords() {
-    const user = this.users[this.currentUser];
-    user.mastered = user.mastered || {};
-    user.lastWords = user.lastWords || [];
-
-    const availableWords = window.vocab.filter(v => (user.mastered[v.word] || 0) < 10);
-    const selectedWords = this.shuffle([...availableWords]).slice(0, 5);
-    
-    user.lastWords = selectedWords.map(v => v.word);
-    this.saveUserData();
-
-    return selectedWords;
+  _pickWords() {
+    const avail = vocab.filter(v=>!(this.users[this.currentUser].mastered[v.word]>=10));
+    const pick = this._shuffle(avail).slice(0,5);
+    this.users[this.currentUser].lastWords = pick.map(x=>x.word);
+    this._saveUserData();
+    return pick;
   }
 
-  setupEmojiBoxes() {
-    this.elements.emojiColumn.innerHTML = "";
-    
-    this.currentVocab.forEach(({ emoji, word }) => {
-      const div = document.createElement("div");
-      div.className = "box";
-      div.textContent = emoji;
-      div.dataset.word = word;
-      
-      if (this.matched.has(word)) {
-        div.classList.add("matched");
-      }
-
-      div.addEventListener("click", () => this.handleEmojiClick(div, word));
-      this.elements.emojiColumn.appendChild(div);
+  _renderEmojis() {
+    this.emojis.innerHTML="";
+    this.currentVocab.forEach(({emoji,word}) => {
+      const d = document.createElement("div");
+      d.className="box"; d.textContent=emoji;
+      d.dataset.word=word;
+      d.onclick = () => this._selectEmoji(d,word);
+      this.emojis.appendChild(d);
     });
   }
 
-  setupWordBoxes() {
-    this.elements.wordColumn.innerHTML = "";
-    const shuffled = this.shuffle([...this.currentVocab]);
-
-    shuffled.forEach(({ word }) => {
-      const div = document.createElement("div");
-      div.className = "box wordBox";
-      div.textContent = word;
-      
-      if (this.matched.has(word)) {
-        div.classList.add("matched", "highlight");
-      }
-
-      div.addEventListener("click", () => this.handleWordClick(div, word));
-      this.elements.wordColumn.appendChild(div);
+  _renderWords() {
+    this.words.innerHTML="";
+    this._shuffle([...this.currentVocab]).forEach(({word})=>{
+      const d = document.createElement("div");
+      d.className="box wordBox"; d.textContent=word;
+      d.onclick = () => this._selectWord(d,word);
+      this.words.appendChild(d);
     });
   }
 
-  handleEmojiClick(div, word) {
+  _selectEmoji(div,word) {
     if (this.matched.has(word)) return;
-
-    if (this.selectedEmoji === div) {
-      this.clearSelections();
-      return;
-    }
-
-    this.clearSelections();
-    this.selectedEmoji = div;
+    if (this.selectedEmoji===div) { div.classList.remove("selected"); this.selectedEmoji=null; return; }
+    this.emojis.querySelectorAll(".selected").forEach(x=>x.classList.remove("selected"));
     div.classList.add("selected");
-    this.speakText(word);
+    this.selectedEmoji=div;
+    this._speak(word);
   }
 
-  handleWordClick(div, word) {
-    if (!this.selectedEmoji || this.matched.has(word)) return;
+  _selectWord(div,word) {
+    if (!this.selectedEmoji) return;
+    const guess = this.selectedEmoji.dataset.word;
+    if (guess===word) this._correct(div,word);
+    else this._wrong(div,word);
+  }
 
-    const emojiWord = this.selectedEmoji.dataset.word;
-    
-    if (emojiWord === word) {
-      this.handleCorrectMatch(div, word);
-    } else {
-      this.handleIncorrectMatch(div, word);
+  _correct(div,word) {
+    this.matched.add(word);
+    this.selectedEmoji.classList.replace("selected","matched");
+    div.classList.add("matched","highlight");
+    this.users[this.currentUser].score++;
+    this.users[this.currentUser].mastered[word]=
+      (this.users[this.currentUser].mastered[word]||0)+1;
+    this._saveUserData();
+    this.scoreDisp.textContent = `Puntos: ${this.users[this.currentUser].score}`;
+    this._updateProgress();
+    this.msgs.textContent="¡Correcto! 🎉";
+    if (this.matched.size===this.currentVocab.length) {
+      this.finishBtn.classList.remove("hidden");
     }
   }
 
-  handleCorrectMatch(div, word) {
-    if (!this.matched.has(word)) {
-      this.matched.add(word);
-      
-      if (!this.errorWords.has(word)) {
-        this.users[this.currentUser].score++;
-        this.users[this.currentUser].mastered[word] = (this.users[this.currentUser].mastered[word] || 0) + 1;
-        this.elements.scoreDisplay.textContent = `Matches: ${this.users[this.currentUser].score}`;
-        this.saveUserData();
-      }
-
-      this.selectedEmoji.classList.remove("selected");
-      this.selectedEmoji.classList.add("matched");
-      div.classList.add("matched", "highlight");
-      
-      this.clearSelections();
-      this.updateProgress();
-      this.speakText(word, () => this.playChiptuneSound("correct"));
-      this.elements.messages.textContent = "¡Punto pixel! ⭐";
-
-      if (this.matched.size === this.currentVocab.length) {
-        this.elements.finishBtn.classList.remove("hidden");
-        this.elements.messages.textContent = "¡Nivel terminado! 🎉";
-        this.speakText(this.elements.messages.textContent, () => this.playChiptuneSound("finish"));
-        this.triggerConfetti();
-      }
-    }
-  }
-
-  handleIncorrectMatch(div, word) {
+  _wrong(div,word) {
     this.errorWords.add(word);
     div.classList.add("incorrect");
-    setTimeout(() => div.classList.remove("incorrect"), 200);
-    
-    this.speakText(word, () => this.playChiptuneSound("incorrect"));
-    this.elements.messages.textContent = "¡Uy, otro intento! 🤔";
-    
-    setTimeout(() => {
-      this.elements.messages.textContent = "";
-    }, 1500);
-    
-    this.clearSelections();
+    setTimeout(()=>div.classList.remove("incorrect"),300);
+    this.msgs.textContent="Intenta otra vez… 🤔";
   }
 
-  clearSelections() {
-    this.selectedEmoji = null;
-    const selected = this.elements.emojiColumn.querySelector(".selected");
-    if (selected) {
-      selected.classList.remove("selected");
-    }
-  }
-
-  updateProgress() {
-    const percentage = (this.matched.size / this.currentVocab.length) * 100;
-    this.elements.progress.style.width = `${percentage}%`;
+  _updateProgress() {
+    const pct = this.matched.size/this.currentVocab.length*100;
+    this.progBar.style.width = pct+"%";
   }
 
   finishQuiz() {
-    this.quizStarted = false;
-    const phrase = this.wellDonePhrases[Math.floor(Math.random() * this.wellDonePhrases.length)];
-    this.elements.messages.textContent = phrase;
-    this.speakText(phrase, () => this.playChiptuneSound("finish"));
-    this.triggerConfetti();
-    
-    this.elements.finishBtn.classList.add("hidden");
-    this.elements.startBtn.classList.remove("hidden");
-    this.updateLeaderboard();
+    this.msgs.textContent = this.wellDonePhrases[Math.random()*this.wellDonePhrases.length|0];
+    this._updateLeaderboard();
+    this.finishBtn.classList.add("hidden");
   }
 
-  updateLeaderboard() {
-    const sortedUsers = Object.entries(this.users)
-      .sort((a, b) => b[1].score - a[1].score);
-    
-    this.elements.leaderboardList.innerHTML = sortedUsers
-      .map(([user, data]) => `<li>${user}: ${data.score} píxeles ⭐</li>`)
+  _updateLeaderboard() {
+    const list = Object.entries(this.users)
+      .sort((a,b)=>b[1].score - a[1].score)
+      .map(([u,d])=>`<li>${u}: ${d.score}</li>`)
       .join("");
-    
-    this.elements.leaderboardDiv.classList.remove("hidden");
+    this.lbList.innerHTML = list;
   }
 
-  logoutUser() {
-    this.saveUserData();
-    this.currentUser = null;
-    this.quizStarted = false;
-    this.matched.clear();
-    this.errorWords.clear();
-    this.selectedEmoji = null;
-    this.currentVocab = [];
-    
-    this.elements.pinInput.value = "";
-    this.elements.usernameSelect.value = "";
-    this.elements.loginError.textContent = "";
-    this.elements.messages.textContent = "";
-    
+  logout() {
+    this._saveUserData();
     sessionStorage.removeItem("currentUser");
-    this.showLoginInterface();
+    location.reload();
   }
 
-  saveUserData() {
+  _saveUserData() {
+    localStorage.setItem("users",JSON.stringify(this.users));
+  }
+
+  _loadUserData() {
     try {
-      localStorage.setItem("users", JSON.stringify(this.users));
-    } catch (e) {
-      console.error("Failed to save user data:", e);
-    }
+      const s = localStorage.getItem("users");
+      if (s) Object.assign(this.users, JSON.parse(s));
+    } catch{}
   }
 
-  loadUserData() {
-    try {
-      const saved = localStorage.getItem("users");
-      if (saved) {
-        const userData = JSON.parse(saved);
-        Object.keys(this.users).forEach(user => {
-          if (userData[user]) {
-            this.users[user] = { ...this.users[user], ...userData[user] };
-          }
-        });
-      }
-    } catch (e) {
-      console.error("Failed to load user data:", e);
+  _shuffle(a) {
+    for(let i=a.length-1;i>0;--i){
+      const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];
     }
+    return a;
   }
 
-  shuffle(array) {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
+  _speak(text) {
+    if (!("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    speechSynthesis.speak(u);
   }
+}
 
-  speakText(text, callback) {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtte
+// instantiate when DOM ready
+window.addEventListener("DOMContentLoaded",()=>new SpanishVocabTrainer());
