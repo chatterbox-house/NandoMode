@@ -13,7 +13,7 @@ A Spanish vocabulary trainer inspired by Fernando, a tall, blonde-haired, blue-e
 - **Tech**: HTML, CSS, JavaScript, Web Audio API, and base64 assets.
 
 ## File Structure
-To keep the project organized, we’ll use multiple files:
+To keep the project organized, we'll use multiple files:
 NandoMode/
 ├── index.html           # Main page with game layout
 ├── css/
@@ -25,14 +25,16 @@ NandoMode/
 │   └── confetti.js     # Confetti animation for correct matches
 ├── assets/
 │   ├── images/         # Pixel art (sprites, avatars, banner)
-│   │   ├── cat_sprite.png
-│   │   ├── sad_sprite.png
-│   │   ├── banner.png
-│   │   ├── avatar_tony.png
-│   │   └── ...         # Avatars for Mina, Sorato, Kaito, Maria
+│   │   ├── cat_sprite.png    # 8-bit cat for correct matches
+│   │   ├── sad_sprite.png    # 8-bit sad face for incorrect matches
+│   │   ├── banner.png        # Victory banner for end screen
+│   │   ├── avatar_tony.png   # Pixel avatar for Tony
+│   │   ├── avatar_mina.png   # Pixel avatar for Mina
+│   │   ├── avatar_sorato.png # Pixel avatar for Sorato
+│   │   ├── avatar_kaito.png  # Pixel avatar for Kaito
+│   │   └── avatar_maria.png  # Pixel avatar for Maria
 │   └── audio/          # Optional sound files (if not using Web Audio API)
 └── README.md           # This file
-
 ## Next Steps
 - Add `index.html` to set up the game’s basic structure.
 - Create folders (`css`, `js`, `assets`) and initial files.
