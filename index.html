@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NandoMode: Spanish Vocab Trainer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <h1>NandoMode</h1>
+  <button id="themeToggle" title="Toggle Light/Dark Mode"></button>
+  <button id="musicToggle" title="Toggle Music"></button>
+
+  <div id="loginSection">
+    <div id="loginError"></div>
+    <label for="username">Usuario:</label>
+    <select id="username">
+      <option value="">-- Seleccione un usuario --</option>
+      <option value="Tony"><img src="assets/images/avatar_tony.png"> Tony</option>
+      <option value="Mina"><img src="assets/images/avatar_mina.png"> Mina</option>
+      <option value="Sorato"><img src="assets/images/avatar_sorato.png"> Sorato</option>
+      <option value="Kaito"><img src="assets/images/avatar_kaito.png"> Kaito</option>
+      <option value="Maria"><img src="assets/images/avatar_maria.png"> Maria</option>
+    </select>
+    <label for="pin">PIN:</label>
+    <input type="password" id="pin" placeholder="Introduce tu PIN">
+    <button id="loginBtn">Iniciar sesión</button>
+  </div>
+
+  <div id="leaderboard" style="display:none;">
+    <h2>Leaderboard</h2>
+    <ol id="leaderboardList"></ol>
+  </div>
+
+  <div id="buttons" style="display:none;">
+    <button id="startBtn">Start Quiz</button>
+    <button id="logoutBtn" style="display:none;">Logout</button>
+  </div>
+
+  <div id="messages"></div>
+
+  <div id="progressBar" style="display:none;">
+    <div id="progress"></div>
+  </div>
+
+  <div id="score" style="display:none;">Matches: 0</div>
+
+  <div id="container" style="display:none;">
+    <div id="emojiColumn"></div>
+    <div id="wordColumn"></div>
+  </div>
+
+  <div id="endScreen" style="display:none;">
+    <h2>¡Bien Hecho!</h2>
+    <img class="banner" src="assets/images/banner.png" alt="Victory Banner">
+    <div id="endLeaderboard"></div>
+    <button id="playBtn">Jugar ▶</button>
+    <button id="finishEndBtn">Terminar</button>
+  </div>
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <script src="js/audio.js"></script>
+  <script src="js/confetti.js"></script>
+  <script src="js/leaderboard.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
