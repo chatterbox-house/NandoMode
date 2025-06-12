@@ -156,13 +156,17 @@ class SpanishVocabTrainer {
 
   /* Quiz & Rotation */
    startQuiz() {
-         // 1) hide the login screen (in case it's still up)
-    this.loginScreen.classList.add("hidden");
+    // 1) hide everything but the emoji/word columns
+    this.loginScreen .classList.add("hidden");
+    this.startBtn    .classList.add("hidden");
+    this.finishBtn   .classList.add("hidden");
+    document.getElementById("leaderboard").classList.add("hidden");
+    this.messages.textContent = "";
 
-    // 2) show the game screen (if you’d ever hidden it)
-    this.gameScreen.classList.remove("hidden");
+    // 2) ensure the victory screen is gone
+    this.victoryScreen.classList.add("hidden");
 
-    // now carry on with your normal quiz setup:
+    // …then the rest of your existing quiz-setup code…
     const udata = this.users[this.currentUser];
     // build pool of words not yet mastered 10×
     const pool = window.vocab.filter(v => (udata.mastered[v.word]||0) < 10);
