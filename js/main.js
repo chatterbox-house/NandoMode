@@ -1,7 +1,4 @@
-import { speakText, playSound, isSpeaking as audioIsSpeaking } from './audio.js';
-import { startConfetti, stopConfetti } from './confetti.js';
-import { updateLeaderboard } from './leaderboard.js';
-
+let isSpeaking = false;
 let score = 0;
 let selectedEmoji = null;
 let selectedWord = null;
@@ -13,11 +10,11 @@ const pairs = [
   { emoji: '📖', word: 'Libro' }
 ];
 const users = {
-  Tony: { pin: '1984', avatar: 'assets/images/avatar_tony.png' },
-  Mina: { pin: '1982', avatar: 'assets/images/avatar_mina.png' },
-  Sorato: { pin: '2014', avatar: 'assets/images/avatar_sorato.png' },
-  Kaito: { pin: '2015', avatar: 'assets/images/avatar_kaito.png' },
-  Maria: { pin: '2019', avatar: 'assets/images/avatar_maria.png' }
+  Tony: { pin: '1111', avatar: 'assets/images/avatar_tony.png' },
+  Mina: { pin: '2222', avatar: 'assets/images/avatar_mina.png' },
+  Sorato: { pin: '3333', avatar: 'assets/images/avatar_sorato.png' },
+  Kaito: { pin: '4444', avatar: 'assets/images/avatar_kaito.png' },
+  Maria: { pin: '5555', avatar: 'assets/images/avatar_maria.png' }
 };
 let currentUser = null;
 
@@ -77,9 +74,10 @@ function startGame() {
 }
 
 function handleBoxClick(box) {
-  if (audioIsSpeaking || box.classList.contains('matched')) {
+  if (isSpeaking || box.classList.contains('matched')) {
     if (box.classList.contains('emojiBox')) {
-      speakText(box.dataset.word, () => {});
+      isSpeaking = true;
+      speakText(box.dataset.word, () => { isSpeaking = false; });
     }
     return;
   }
@@ -187,7 +185,5 @@ window.addEventListener('load', () => {
   if (localStorage.getItem('theme') === 'dark') {
     document.body.classList.add('dark');
   }
-  updateLeaderboard(0);
-});
   updateLeaderboard(0);
 });
