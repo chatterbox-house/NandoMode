@@ -1,61 +1,236 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NandoMode</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spanish Vocab Trainer</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 2em auto; }
+    .hidden { display: none; }
+    .box { display:inline-block; padding: .5em; margin:.25em; border:1px solid #333; cursor:pointer; }
+    .matched { background: #cfc; }
+    .incorrect { background: #fcc; }
+    .highlight { box-shadow: 0 0 5px gold; }
+    #progressBar { width:100%; height:1em; background:#eee; margin:1em 0; }
+    #progress { height:100%; width:0; background:limegreen; }
+  </style>
 </head>
 <body>
-  <h1>NandoMode</h1>
-  <button id="themeToggle" title="Toggle Light/Dark Mode" aria-label="Toggle theme"></button>
-  
-  <div id="leaderboard" class="hidden">
-    <h2>Leaderboard</h2>
-    <ol id="leaderboardList"></ol>
-  </div>
-  
+
+  <!-- LOGIN -->
   <div id="loginSection">
-    <div id="loginError" role="alert"></div>
-    <label for="username">Usuario:</label>
-    <select id="username" required>
-      <option value="">-- Seleccione un usuario --</option>
-      <option value="Tony">Tony</option>
-      <option value="Mina">Mina</option>
-      <option value="Sorato">Sorato</option>
-      <option value="Kaito">Kaito</option>
-      <option value="Maria">Maria</option>
+    <h2>Bienvenido</h2>
+    <select id="username">
+      <option value="">— Selecciona usuario —</option>
+      <option>Tony</option><option>Mina</option><option>Sorato</option>
+      <option>Kaito</option><option>Maria</option>
     </select>
-    <label for="pin">PIN:</label>
-    <input type="password" id="pin" placeholder="Introduce tu PIN" autocomplete="off" required>
-    <button id="loginBtn">Iniciar sesión</button>
+    <input id="pin" type="password" placeholder="PIN" />
+    <button id="loginBtn">Entrar</button>
+    <div id="loginError" style="color:red"></div>
   </div>
-  
+
+  <!-- GAME -->
   <div id="buttons" class="hidden">
-    <button id="startBtn">Start Quiz</button>
-    <button id="finishBtn" class="hidden">Finish Quiz</button>
-    <button id="logoutBtn" class="hidden">Logout</button>
+    <button id="startBtn">Comenzar</button>
+    <button id="finishBtn" class="hidden">Terminar</button>
+    <button id="logoutBtn">Salir</button>
+    <div id="messages"></div>
   </div>
-  
-  <div id="messages" role="status" aria-live="polite"></div>
-  
-  <div id="progressBar" class="hidden">
-    <div id="progress"></div>
-  </div>
-  
-  <div id="score" class="hidden">Matches: 0</div>
-  
+
   <div id="container" class="hidden">
     <div id="emojiColumn"></div>
     <div id="wordColumn"></div>
+    <div>Puntos: <span id="score">0</span></div>
+    <div id="progressBar"><div id="progress"></div></div>
+    <h3>Leaderboard</h3>
+    <ul id="leaderboardList"></ul>
   </div>
-  
-  <canvas id="confettiCanvas"></canvas>
-  
-  
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<script defer src="vocab.js"></script>
-<script defer src="app.js"></script>
-</body>
-</html>
+
+  <!-- 1) Load your vocab first -->
+  <script src="vocab.js"></script>
+  <!-- 2) Then the trainer code -->
+  <script>
+    // index.html (inline trainer, so you only need 2 files)
+    console.log("vocab is", window.vocab);
+
+    class SpanishVocabTrainer {
+      constructor() {
+        this.users = {
+          Tony:   { pin:"1984", score:0, mastered:{}, lastWords:[] },
+          Mina:   { pin:"1982", score:0, mastered:{}, lastWords:[] },
+          Sorato: { pin:"2014", score:0, mastered:{}, lastWords:[] },
+          Kaito:  { pin:"2015", score:0, mastered:{}, lastWords:[] },
+          Maria:  { pin:"2019", score:0, mastered:{}, lastWords:[] }
+        };
+        this.goodLuck = ["¡Listo, pixelero! 🎮","¡A por los puntos! ⭐","¡Tú puedes! 💪"];
+        this.wellDone = ["¡Nivel completado! ✅","¡Eres un pro! 🏆"];
+        this.matched = new Set();
+        this.errorSet = new Set();
+        this.currVocab = [];
+        this.selEmoji = null;
+        this._bind();
+        this._loadData();
+        this._wireEvents();
+      }
+
+      _bind() {
+        const $ = id=>document.getElementById(id);
+        this.loginSec = $('loginSection');
+        this.userSel   = $('username');
+        this.pinInput  = $('pin');
+        this.loginBtn  = $('loginBtn');
+        this.loginErr  = $('loginError');
+        this.buttons   = $('buttons');
+        this.startBtn  = $('startBtn');
+        this.finishBtn = $('finishBtn');
+        this.logoutBtn = $('logoutBtn');
+        this.msgs      = $('messages');
+        this.container = $('container');
+        this.emojiCol  = $('emojiColumn');
+        this.wordCol   = $('wordColumn');
+        this.scoreDisp = $('score');
+        this.prog      = $('progress');
+        this.lbList    = $('leaderboardList');
+      }
+
+      _wireEvents() {
+        this.loginBtn .onclick = ()=>this._login();
+        this.startBtn .onclick = ()=>this.startQuiz();
+        this.finishBtn.onclick = ()=>this.finishQuiz();
+        this.logoutBtn.onclick = ()=>this._logout();
+        this.pinInput.onkeypress = e=>{ if(e.key==='Enter') this._login(); };
+      }
+
+      _saveData() {
+        localStorage.setItem('users', JSON.stringify(this.users));
+      }
+
+      _loadData(){
+        const s = localStorage.getItem('users');
+        if(s) Object.assign(this.users, JSON.parse(s));
+      }
+
+      _login(){
+        const u=this.userSel.value, p=this.pinInput.value.trim();
+        if(!u){ this.loginErr.textContent="Selecciona usuario"; return; }
+        if(!this.users[u]||this.users[u].pin!==p){
+          this.loginErr.textContent="PIN inválido"; return;
+        }
+        this.loginErr.textContent="";
+        this.currentUser=u;
+        sessionStorage.setItem('currentUser',u);
+        this.loginSec.classList.add('hidden');
+        this.buttons.classList.remove('hidden');
+        this._updateLeaderboard();
+      }
+
+      startQuiz(){
+        if(!window.vocab||!window.vocab.length){
+          this.msgs.textContent="Error: vocab.js no cargado.";
+          return;
+        }
+        this.matched.clear();
+        this.errorSet.clear();
+        this.currVocab = this._pickWords();
+        this._render();
+        this.scoreDisp.textContent = this.users[this.currentUser].score;
+        this.prog.style.width = '0%';
+        this.finishBtn.classList.add('hidden');
+        this.msgs.textContent = this.goodLuck[Math.random()*this.goodLuck.length|0];
+      }
+
+      _pickWords(){
+        const user = this.users[this.currentUser];
+        const avail = window.vocab.filter(v=>(user.mastered[v.word]||0)<10);
+        const pick = this._shuffle(avail).slice(0,5);
+        user.lastWords = pick.map(x=>x.word);
+        this._saveData();
+        return pick;
+      }
+
+      _render(){
+        // emojis
+        this.emojiCol.innerHTML='';
+        this.currVocab.forEach(({emoji,word})=>{
+          const d = document.createElement('div');
+          d.className='box'; d.textContent=emoji; d.dataset.word=word;
+          d.onclick = ()=>this._selEmoji(d,word);
+          this.emojiCol.appendChild(d);
+        });
+        // words
+        this.wordCol.innerHTML='';
+        this._shuffle(this.currVocab).forEach(({word})=>{
+          const d = document.createElement('div');
+          d.className='box wordBox'; d.textContent=word;
+          d.onclick = ()=>this._selWord(d,word);
+          this.wordCol.appendChild(d);
+        });
+        this.container.classList.remove('hidden');
+      }
+
+      _selEmoji(div,word){
+        if(this.matched.has(word)) return;
+        if(this.selEmoji===div){ div.classList.remove('selected'); this.selEmoji=null; return; }
+        this.emojiCol.querySelectorAll('.selected').forEach(x=>x.classList.remove('selected'));
+        div.classList.add('selected'); this.selEmoji=div;
+        new SpeechSynthesisUtterance(word) && speechSynthesis.speak(new SpeechSynthesisUtterance(word));
+      }
+
+      _selWord(div,word){
+        if(!this.selEmoji) return;
+        const guess=this.selEmoji.dataset.word;
+        if(guess===word) this._correct(div,word);
+        else this._wrong(div,word);
+      }
+
+      _correct(div,word){
+        this.matched.add(word);
+        this.selEmoji.classList.replace('selected','matched');
+        div.classList.add('matched','highlight');
+        const u=this.users[this.currentUser];
+        u.score++; u.mastered[word]=(u.mastered[word]||0)+1;
+        this._saveData();
+        this.scoreDisp.textContent = u.score;
+        const pct = this.matched.size/this.currVocab.length*100;
+        this.prog.style.width = pct+'%';
+        this.msgs.textContent="¡Correcto! 🎉";
+        if(this.matched.size===this.currVocab.length){
+          this.finishBtn.classList.remove('hidden');
+        }
+        this.selEmoji=null;
+      }
+
+      _wrong(div){
+        div.classList.add('incorrect');
+        setTimeout(()=>div.classList.remove('incorrect'),300);
+        this.msgs.textContent="Intenta otra vez…";
+      }
+
+      finishQuiz(){
+        this.msgs.textContent = this.wellDone[Math.random()*this.wellDone.length|0];
+        this._updateLeaderboard();
+      }
+
+      _updateLeaderboard(){
+        const html = Object.entries(this.users)
+          .sort((a,b)=>b[1].score - a[1].score)
+          .map(([u,d])=>`<li>${u}: ${d.score}</li>`).join('');
+        this.lbList.innerHTML = html;
+      }
+
+      _logout(){
+        this._saveData();
+        sessionStorage.removeItem('currentUser');
+        location.reload();
+      }
+
+      _shuffle(a){
+        for(let i=a.length-1;i>0;i--){
+          const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];
+        }
+        return a;
+      }
+    }
+
+    // instantiate once DOM is ready
