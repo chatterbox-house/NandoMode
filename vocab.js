@@ -1,4 +1,6 @@
 // vocab.js
+// Replace these sample entries with your full list of 99 items.
+// IMPORTANT: it must assign into window.vocab
 window.vocab = [
   { emoji: "🍎", word: "manzana", type: "noun" },
   { emoji: "🐶", word: "perro", type: "noun" },
