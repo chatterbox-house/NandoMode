@@ -79,20 +79,29 @@ class SpanishVocabTrainer {
   }
 
   /* Speech */
+  /* ─── SpeechSynthesis (force Spanish) ─────────────────────────── */
   _setupVoices() {
     this.voices = [];
-    const load = () => {
-      this.voices = speechSynthesis.getVoices().filter(v=>v.lang.startsWith("es"));
+    const loadVoices = () => {
+      const all = speechSynthesis.getVoices();
+      this.voices = all.filter(v => v.lang.startsWith("es"));
     };
-    speechSynthesis.onvoiceschanged = load;
-    load();
+    // some browsers fire voiceschanged after initial load
+    speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
   }
+
   _speak(word) {
-    if (!this.voices.length) return;
-    const utt = new SpeechSynthesisUtterance(word);
-    utt.voice = this.voices[0]; // first Spanish voice
-    speechSynthesis.speak(utt);
+    const utter = new SpeechSynthesisUtterance(word);
+    // force Spanish pronunciation
+    utter.lang = "es-ES";
+    // if we found any Spanish voices, pick the first
+    if (this.voices && this.voices.length) {
+      utter.voice = this.voices[0];
+    }
+    speechSynthesis.speak(utter);
   }
+
 
   /* Theme & Session */
   _toggleTheme() {
