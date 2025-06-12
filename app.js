@@ -72,11 +72,24 @@ class SpanishVocabTrainer {
     gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime+dur);
     osc.stop(this.audioCtx.currentTime+dur);
   }
-  _soundCorrect() { this._playTone(440,0.1); setTimeout(()=>this._playTone(660,0.1),100); }
-  _soundWrong()   { this._playTone(150,0.2); }
-  _soundFinish() {
-    [523,587,659].forEach((f,i)=>setTimeout(()=>this._playTone(f,0.15), i*150));
+  _soundCorrect() {
+    // single clean ping
+    this._playTone(880, 0.1, "square");
   }
+
+  _soundWrong() {
+    // two-note descending “uh-oh”
+    this._playTone(600, 0.12, "sawtooth");
+    setTimeout(() => this._playTone(400, 0.12, "sawtooth"), 120);
+  }
+
+  _soundFinish() {
+    // little fanfare: three rising notes
+    [659, 784, 880].forEach((f, i) =>
+      setTimeout(() => this._playTone(f, 0.2, "square"), i * 200)
+    );
+  }
+
 
   /* Speech */
   /* ─── SpeechSynthesis (force Spanish) ─────────────────────────── */
