@@ -1,80 +1,88 @@
-/* Retro 8-bit theme + dark/light toggle */
 :root {
-  --bg: #f0f0f0;
-  --fg: #202020;
-  --box-bg: #ffffff;
-  --box-border: #202020;
-  --highlight: gold;
-  --error: #c00;
+  --bg: #f0f0f0; --fg: #202020;
+  --box-bg: #fff; --box-border: #202020;
+  --highlight: gold; --error: #c00;
 }
 body[data-theme="dark"] {
-  --bg: #202020;
-  --fg: #f0f0f0;
-  --box-bg: #303030;
-  --box-border: #f0f0f0;
+  --bg: #202020; --fg: #f0f0f0;
+  --box-bg: #303030; --box-border: #f0f0f0;
 }
 * { box-sizing: border-box; }
 body {
-  margin: 0; padding: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: 'Press Start 2P', monospace;
-  text-align: center;
+  margin:0; padding:0;
+  background:var(--bg); color:var(--fg);
+  font-family:'Press Start 2P',monospace;
+  text-align:center;
 }
 header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: .5em 1em; background: var(--box-bg); border-bottom: 2px solid var(--box-border);
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--box-bg); padding:.5em 1em;
+  border-bottom:2px solid var(--box-border);
 }
-button { cursor: pointer; font-family: inherit; }
+header .logo img { height:40px; }
+button { font-family:inherit; cursor:pointer; }
 
-main { padding: 1em; }
-.hidden { display: none; }
-.error { color: var(--error); margin-top: .5em; }
-
-/* login */
-.login-controls { display: flex; gap: .5em; justify-content: center; margin: 1em 0; }
+/* LOGIN */
+.login-controls {
+  display:flex; flex-wrap:wrap; gap:.5em;
+  justify-content:center; margin:1em 0;
+}
 .login-controls select,
-.login-controls input { font-family: inherit; font-size: .8rem; padding: .5em; }
+.login-controls input {
+  flex:1 1 120px; padding:.5em; font-size:1rem;
+}
+#error { color:var(--error); }
 
-/* controls & messages */
-.controls { display: flex; gap: .5em; justify-content: center; margin-bottom: .5em; }
-#messages { min-height: 2em; margin-bottom: 1em; }
+/* CONTROLS & MESSAGES */
+.controls { display:flex; gap:.5em; justify-content:center; margin:.5em 0; }
+#messages { min-height:2em; margin-bottom:1em; }
 
-/* play area */
+/* PLAY AREA */
 #playArea {
-  display: flex; gap: 1em;
-  justify-content: center; flex-wrap: wrap;
+  display:grid; grid-template-columns:1fr 2fr; gap:.5em;
+  margin:0 auto; max-width:500px;
 }
 #emojiColumn, #wordColumn {
-  display: grid;
-  gap: .5em;
-  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  display:grid; gap:.5em;
+  grid-template-columns:repeat(auto-fit, minmax(50px,1fr));
 }
-.box {
-  user-select: none;
-  width: 64px; height: 64px;
-  line-height: 64px;
-  background: var(--box-bg);
-  border: 2px solid var(--box-border);
-  font-size: 1.2rem;
-  cursor: pointer;
+/* emoji smaller */
+.emojiBox {
+  width:56px; height:56px; font-size:1.5rem;
 }
-.box.selected { outline: 3px solid orange; }
-.box.matched { background: var(--highlight); border-color: var(--box-border); cursor: default; }
-.box.incorrect { background: #f88; }
-.box.highlight { box-shadow: 0 0 8px var(--highlight); }
+/* words wider */
+.wordBox {
+  min-width:120px; min-height:56px; font-size:.8rem;
+  padding:.5em;
+}
 
-/* status & progress */
-#statusBar { margin: 1em 0; }
+/* SHARED BOX STYLES */
+.box {
+  background:var(--box-bg);
+  border:2px solid var(--box-border);
+  line-height:normal; /* allow word wrap */
+  display:flex; align-items:center; justify-content:center;
+  text-align:center; word-break:break-word;
+}
+.box.selected { outline:3px solid orange; }
+.box.matched  { background:var(--highlight); cursor:default; }
+.box.incorrect{ background:#f88; }
+.box.highlight{ box-shadow:0 0 8px var(--highlight); }
+
+/* STATUS & PROGRESS */
+#statusBar { margin:1em 0; }
 #progressBar {
-  height: 12px; background: var(--box-border);
-  width: 80%; margin: .5em auto; border-radius: 6px; overflow: hidden;
+  width:80%; height:12px; background:var(--box-border);
+  margin:.5em auto; border-radius:6px; overflow:hidden;
 }
 #progressFill {
-  height: 100%; width: 0; background: var(--highlight);
+  height:100%; width:0; background:var(--highlight);
 }
 
-/* leaderboard */
-#leaderboard { margin-top: 1em; }
-#leaderList { list-style: none; padding: 0; }
-#leaderList li { margin: .2em 0; }
+/* LEADERBOARD */
+#leaderboard { margin-top:1em; }
+#leaderList { list-style:none; padding:0; }
+#leaderList li { margin:.2em 0; }
+
+/* VICTORY */
+#victoryScreen img { max-width:150px; margin:1em 0; }
