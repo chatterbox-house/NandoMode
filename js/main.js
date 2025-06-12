@@ -1,11 +1,14 @@
-let isSpeaking = false;
+import { speakText, playSound, isSpeaking as audioIsSpeaking } from './audio.js';
+import { startConfetti, stopConfetti } from './confetti.js';
+import { updateLeaderboard } from './leaderboard.js';
+
 let score = 0;
 let selectedEmoji = null;
 let selectedWord = null;
 const pairs = [
   { emoji: '🍎', word: 'Manzana' },
   { emoji: '🚗', word: 'Carro' },
-  { emoji: '🐗', word: 'Perro' },
+  { emoji: '🐶', word: 'Perro' },
   { emoji: '🌞', word: 'Sol' },
   { emoji: '📖', word: 'Libro' }
 ];
@@ -28,6 +31,7 @@ document.getElementById('loginBtn').addEventListener('click', () => {
     document.getElementById('loginSection').style.display = 'none';
     document.getElementById('buttons').style.display = 'block';
     document.getElementById('leaderboard').style.display = 'block';
+    document.getElementById('logoutBtn').style.display = 'block';
     updateLeaderboard(score);
   } else {
     errorDiv.textContent = 'Usuario o PIN incorrecto';
@@ -73,10 +77,9 @@ function startGame() {
 }
 
 function handleBoxClick(box) {
-  if (isSpeaking || box.classList.contains('matched')) {
+  if (audioIsSpeaking || box.classList.contains('matched')) {
     if (box.classList.contains('emojiBox')) {
-      isSpeaking = true;
-      speakText(box.dataset.word, () => { isSpeaking = false; });
+      speakText(box.dataset.word, () => {});
     }
     return;
   }
@@ -155,13 +158,14 @@ function showEndScreen() {
     document.getElementById('buttons').style.display = 'block';
     document.getElementById('leaderboard').style.display = 'block';
     stopConfetti();
-  });
+    startGame();
+  }, { once: true });
   document.getElementById('finishEndBtn').addEventListener('click', () => {
     document.getElementById('endScreen').style.display = 'none';
     document.getElementById('loginSection').style.display = 'block';
     document.getElementById('leaderboard').style.display = 'none';
     stopConfetti();
-  });
+  }, { once: true });
 }
 
 document.getElementById('themeToggle').addEventListener('click', () => {
@@ -183,5 +187,7 @@ window.addEventListener('load', () => {
   if (localStorage.getItem('theme') === 'dark') {
     document.body.classList.add('dark');
   }
+  updateLeaderboard(0);
+});
   updateLeaderboard(0);
 });
