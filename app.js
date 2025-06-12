@@ -146,30 +146,45 @@ class SpanishVocabTrainer {
   }
 
   /* Quiz & Rotation */
-  startQuiz() {
-    if (!window.vocab || window.vocab.length===0) {
-      this.messages.textContent = "Error: vocab.js no cargado."; return;
-    }
+   startQuiz() {
     const udata = this.users[this.currentUser];
-    const pool = window.vocab.filter(v=> (udata.mastered[v.word]||0) < 10 );
-    // carry over up to 2 from last round
-    const carry = udata.lastWords.filter(w=> pool.some(v=>v.word===w)).slice(0,2);
-    const leftovers = pool.filter(v=> !carry.includes(v.word));
-    const pickNew = this._shuffle(leftovers).slice(0,5-carry.length).map(v=>v.word);
-    const roundWords = [...carry, ...pickNew];
+    // build pool of words not yet mastered 10×
+    const pool = window.vocab.filter(v => (udata.mastered[v.word]||0) < 10);
+
+    // carry‐over up to 2 from last round
+    const carry = udata.lastWords
+      .filter(w => pool.some(v => v.word === w))
+      .slice(0, 2);
+
+    // pick the rest new to make 5 total
+    const leftovers = pool.filter(v => !carry.includes(v.word));
+    const newPick = this._shuffle(leftovers)
+      .slice(0, 5 - carry.length)
+      .map(v => v.word);
+
+    // final words for this round
+    const roundWords = [...carry, ...newPick];
     udata.lastWords = roundWords;
     this._saveData();
 
-    this.currentSet = window.vocab.filter(v=> roundWords.includes(v.word));
-    this.matched = new Set();
-    this.errors  = new Set();
+    // prepare state
+    this.currentSet = window.vocab.filter(v => roundWords.includes(v.word));
+    this.matched    = new Set();
+    this.errors     = new Set();
 
-    this.scoreDisp.textContent = udata.score;
+    // reset UI
+    this.scoreDisp.textContent   = udata.score;
     this.progressFill.style.width = "0%";
     this.finishBtn.classList.add("hidden");
-    this.messages.textContent = this.goodLuck[Math.random()*this.goodLuck.length|0];
+
+    // friendly go‐message
+    this.messages.textContent = 
+      this.goodLuck[Math.floor(Math.random() * this.goodLuck.length)];
+
+    // finally render the 2 columns
     this._renderQuiz();
   }
+
 
   _renderQuiz() {
     // emojis
