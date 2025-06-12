@@ -42,25 +42,44 @@ button { font-family: inherit; cursor: pointer; }
 }
 #messages { min-height: 2em; margin-bottom: 1em; }
 
-/* PLAY AREA */
+/* PLAY AREA now uses flex to create two side-by-side columns */
 #playArea {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: .5em;
-  max-width: 600px; margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1em;
+  flex-wrap: wrap;
+  margin: 1em auto;
 }
-#emojiColumn, #wordColumn {
-  display: grid; gap: .5em;
-  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+
+/* each column is a vertical stack */
+#emojiColumn,
+#wordColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1em;
 }
+
+/* Emoji boxes: square, large but capped */
 .emojiBox {
-  width: 60px; height: 60px; font-size: 2rem;
+  width: 20vw;
+  height: 20vw;
+  max-width: 80px;
+  max-height: 80px;
+  font-size: 2.5rem;
 }
+
+/* Word boxes: wider to accommodate text */
 .wordBox {
-  min-width: 140px; min-height: 60px;
-  padding: .5em;
-  font-size: .8rem;
+  width: 40vw;
+  height: 20vw;
+  max-width: 160px;
+  max-height: 80px;
+  font-size: 1rem;
+  padding: .25em;
 }
+
 
 /* SHARED BOX */
 .box {
