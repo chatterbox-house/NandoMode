@@ -281,13 +281,21 @@ class SpanishVocabTrainer {
   }
 
   finishQuiz() {
-    this.gameScreen.classList.add("hidden");
+    // hide the in-game view
+    this.gameScreen   .classList.add("hidden");
+    document.getElementById("leaderboard").classList.add("hidden");
+
+    // show the victory screen
     this.victoryScreen.classList.remove("hidden");
-    this.victoryMsg.textContent = this.wellDone[Math.random()*this.wellDone.length|0];
-    this._updateLeaderboard();
+    this.victoryMsg.textContent = this.wellDone[
+      Math.floor(Math.random()*this.wellDone.length)
+    ];
+
+    // triumphant finish sound & confetti
     this._soundFinish();
-    confetti({ particleCount: 100, spread: 70 });
+    confetti({ particleCount: 200, spread: 100 });
   }
+
 
   _continue() {
     this.victoryScreen.classList.add("hidden");
