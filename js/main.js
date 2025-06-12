@@ -4,9 +4,10 @@ let selectedEmoji = null;
 let selectedWord = null;
 const pairs = [
   { emoji: '🍎', word: 'Manzana' },
-  { emoji: '🚗', word: 'Coche' },
+  { emoji: '🚗', word: 'Carro' },
   { emoji: '🐶', word: 'Perro' },
-  { emoji: '🌞', word: 'Sol' }
+  { emoji: '🌞', word: 'Sol' },
+  { emoji: '📖', word: 'Libro' }
 ];
 const users = {
   Tony: { pin: '1984', avatar: 'assets/images/avatar_tony.png' },
