@@ -1,4 +1,5 @@
-const vocab = [
+// vocab.js
+window.vocab = [
   { emoji: "🍎", word: "manzana", type: "noun" },
   { emoji: "🐶", word: "perro", type: "noun" },
   { emoji: "🚗", word: "coche", type: "noun" },
