@@ -1,0 +1,80 @@
+/* Retro 8-bit theme + dark/light toggle */
+:root {
+  --bg: #f0f0f0;
+  --fg: #202020;
+  --box-bg: #ffffff;
+  --box-border: #202020;
+  --highlight: gold;
+  --error: #c00;
+}
+body[data-theme="dark"] {
+  --bg: #202020;
+  --fg: #f0f0f0;
+  --box-bg: #303030;
+  --box-border: #f0f0f0;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Press Start 2P', monospace;
+  text-align: center;
+}
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .5em 1em; background: var(--box-bg); border-bottom: 2px solid var(--box-border);
+}
+button { cursor: pointer; font-family: inherit; }
+
+main { padding: 1em; }
+.hidden { display: none; }
+.error { color: var(--error); margin-top: .5em; }
+
+/* login */
+.login-controls { display: flex; gap: .5em; justify-content: center; margin: 1em 0; }
+.login-controls select,
+.login-controls input { font-family: inherit; font-size: .8rem; padding: .5em; }
+
+/* controls & messages */
+.controls { display: flex; gap: .5em; justify-content: center; margin-bottom: .5em; }
+#messages { min-height: 2em; margin-bottom: 1em; }
+
+/* play area */
+#playArea {
+  display: flex; gap: 1em;
+  justify-content: center; flex-wrap: wrap;
+}
+#emojiColumn, #wordColumn {
+  display: grid;
+  gap: .5em;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+}
+.box {
+  user-select: none;
+  width: 64px; height: 64px;
+  line-height: 64px;
+  background: var(--box-bg);
+  border: 2px solid var(--box-border);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.box.selected { outline: 3px solid orange; }
+.box.matched { background: var(--highlight); border-color: var(--box-border); cursor: default; }
+.box.incorrect { background: #f88; }
+.box.highlight { box-shadow: 0 0 8px var(--highlight); }
+
+/* status & progress */
+#statusBar { margin: 1em 0; }
+#progressBar {
+  height: 12px; background: var(--box-border);
+  width: 80%; margin: .5em auto; border-radius: 6px; overflow: hidden;
+}
+#progressFill {
+  height: 100%; width: 0; background: var(--highlight);
+}
+
+/* leaderboard */
+#leaderboard { margin-top: 1em; }
+#leaderList { list-style: none; padding: 0; }
+#leaderList li { margin: .2em 0; }
