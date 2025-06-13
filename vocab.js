@@ -202,7 +202,7 @@ window.vocab = [
   { "emoji": "🧣", "word": "bufanda", "type": "noun" },
   { "emoji": "🧤", "word": "guantes", "type": "noun" },
   { "emoji": "🧦", "word": "calcetines", "type": "noun" },
-  { "emoji": "👟", "word": "tenis", "type": "noun" },
+  { "emoji": "👟", "word": "zapatillas de tenis", "type": "noun" },
   { "emoji": "👢", "word": "botas", "type": "noun" },
   { "emoji": "👡", "word": "sandalias", "type": "noun" },
   { "emoji": "👠", "word": "tacones", "type": "noun" },
