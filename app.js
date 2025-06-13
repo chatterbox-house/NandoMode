@@ -60,6 +60,20 @@ class SpanishVocabTrainer {
     this.quitVictoryBtn  = $("quitVictoryBtn");
 
     this.themeToggle     = $("themeToggle");
+   }
+
+  _populateUserSelect() {
+    // wipe out any old user options except the first two
+    this.userSelect.innerHTML = `
+      <option value="">— Selecciona usuario —</option>
+      <option value="Guest">Invitado</option>
+    `;
+    Object.keys(this.users).forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = u;
+      opt.textContent = u;
+      this.userSelect.appendChild(opt);
+    });
   }
 
   _hookEvents() {
@@ -146,7 +160,7 @@ class SpanishVocabTrainer {
     localStorage.setItem("users", JSON.stringify(this.users));
   }
 
-  // ───── Auth & Lobby ──────────────────────────────────────
+/* ───── Login / Registration ───────────────────────── */
   _doLogin() {
     const u = this.userSelect.value;
     const p = this.pinInput.value.trim();
@@ -179,16 +193,14 @@ class SpanishVocabTrainer {
     }
     this.users[name] = {
       pin,
-      score:       0,
-      mastered:    {},
-      lastWords:   [],
-      lastCorrect: []
+      score:0,
+      mastered:{},
+      lastWords:[],
+      lastCorrect:[]
     };
     this._saveData();
-    const opt = document.createElement("option");
-    opt.value       = name;
-    opt.textContent = name;
-    this.userSelect.appendChild(opt);
+    // re-populate so new user shows up
+    this._populateUserSelect();
     this.newUser.value = "";
     this.newPin.value  = "";
     alert("Usuario registrado. ¡Ahora inicia sesión!");
