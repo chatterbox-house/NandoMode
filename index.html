@@ -15,9 +15,9 @@
   </header>
 
   <main>
-    <!-- LOGIN -->
+    <!-- PAGE 1: LOGIN -->
     <section id="loginScreen">
-      <h2>Bienvenido</h2>
+      <h2>Iniciar Sesión</h2>
       <div class="login-controls">
         <select id="userSelect">
           <option value="">— Usuario —</option>
@@ -33,38 +33,38 @@
       <div id="loginError" class="error"></div>
     </section>
 
-    <!-- GAME -->
-    <section id="gameScreen" class="hidden">
+    <!-- PAGE 2: LOBBY -->
+    <section id="lobbyScreen" class="hidden">
+      <h2>🏆 Clasificación</h2>
+      <ul id="leaderList"></ul>
       <div class="controls">
-        <button id="startBtn">Comenzar Quiz</button>
-        <button id="finishBtn" class="hidden">Terminar Nivel</button>
+        <button id="startGameBtn">Comenzar Quiz</button>
         <button id="logoutBtn">Salir</button>
       </div>
-      <div id="messages"></div>
+    </section>
 
+    <!-- PAGE 3: GAME -->
+    <section id="gameScreen" class="hidden">
+      <div class="controls">
+        <button id="gameQuitBtn">Salir</button>
+      </div>
       <div id="playArea">
         <div id="emojiColumn"></div>
         <div id="wordColumn"></div>
       </div>
-
       <div id="statusBar">
         <div>Puntos: <span id="scoreDisplay">0</span></div>
         <div id="progressBar"><div id="progressFill"></div></div>
       </div>
-
-      <div id="leaderboard">
-        <h2>🏆 Clasificación</h2>
-        <ul id="leaderList"></ul>
-      </div>
     </section>
 
-    <!-- VICTORY -->
+    <!-- PAGE 4: VICTORY -->
     <section id="victoryScreen" class="hidden">
       <img src="fernando_cheer.png" alt="¡Bien Hecho!" id="victoryImg">
       <div id="victoryMessage"></div>
       <div class="controls">
         <button id="continueBtn">Continuar</button>
-        <button id="quitBtn">Salir</button>
+        <button id="quitVictoryBtn">Salir</button>
       </div>
     </section>
   </main>
