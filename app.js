@@ -203,6 +203,10 @@ class SpanishVocabTrainer {
     this.currentSet = window.vocab.filter(v=>
       roundWords.includes(v.word)
     );
+    this.currentSet = this.currentSet.map(v => ({
+  ...v,
+  id: window.vocab.findIndex(x => x === v)   // each object’s unique index
+}));
     this.matched = new Set();
     this.errors  = new Set();
 
