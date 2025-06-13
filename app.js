@@ -214,9 +214,6 @@ startQuiz() {
 
   this.scoreDisp .textContent = udata.score;
   this.progressFill.style.width = "0%";
-  this.messages.textContent = this.goodLuck[
-    Math.floor(Math.random() * this.goodLuck.length)
-  ];
 
   this._renderQuiz();
 }
