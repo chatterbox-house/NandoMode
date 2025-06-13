@@ -70,7 +70,7 @@ window.vocab = [
   { "emoji": "🚣", "word": "remar", "type": "verb" },
   { "emoji": "🥁", "word": "golpear", "type": "verb" },
   { "emoji": "🪗", "word": "acordeonar", "type": "verb" },
-  { "emoji": "🎳", "word": "bolear", "type": "verb" }
+  { "emoji": "🎳", "word": "bolear", "type": "verb" },
   { "emoji": "🐶", "word": "perro", "type": "noun" },
   { "emoji": "🐱", "word": "gato", "type": "noun" },
   { "emoji": "🦒", "word": "jirafa", "type": "noun" },
