@@ -730,5 +730,4 @@ window.vocab = [
   { "emoji": "🗿", "word": "siglo", "type": "noun" },
   { "emoji": "🌍", "word": "era", "type": "noun" },
   { "emoji": "📉", "word": "periodo", "type": "noun" }
-]
 ];
