@@ -303,6 +303,26 @@ startQuiz() {
     if (this.matched.size === this.currentSet.length) {
       setTimeout(()=>this.finishQuiz(), 300);
     }
+    _handleCorrect(div, word) {
+  const u = this.users[this.currentUser];
+
+  // … your existing score++ / mastered[word]++ …
+
+  // 1) remove this word if already in lastCorrect
+  const idx = u.lastCorrect.indexOf(word);
+  if (idx > -1) u.lastCorrect.splice(idx, 1);
+
+  // 2) if it's still under mastery, unshift to front
+  if (u.mastered[word] < 10) {
+    u.lastCorrect.unshift(word);
+  }
+
+  // 3) save
+  this._saveData();
+
+  // … the rest of your UI update / sound / finishQuiz() logic …
+}
+
   }
 
   _wrong(div) {
