@@ -37,9 +37,9 @@ class SpanishVocabTrainer {
     this.pinInput       = $("pinInput");
     this.loginBtn       = $("loginBtn");
     this.loginError     = $("loginError");
-      this.newUser      = $("newUser");
-  this.newPin       = $("newPin");
-  this.registerBtn  = $("registerBtn");
+    this.newUser      = $("newUser");
+    this.newPin       = $("newPin");
+    this.registerBtn  = $("registerBtn");
 
     this.lobbyScreen    = $("lobbyScreen");
     this.leaderList     = $("leaderList");
@@ -70,7 +70,7 @@ class SpanishVocabTrainer {
     this.continueBtn  .onclick = () => this._gameToLobby();
     this.quitVictoryBtn.onclick = () => this._gameToLobby();
     this.themeToggle  .onclick = () => this._toggleTheme();
-     this.registerBtn.onclick = () => this._registerUser();
+    this.registerBtn.onclick = () => this._registerUser();
   }
 
   /* ───── Audio Setup ───────────────────────────────────────── */
@@ -151,16 +151,60 @@ class SpanishVocabTrainer {
 
   /* ───── Login / Lobby Transitions ─────────────────────────── */
   _doLogin() {
-    const u = this.userSelect.value, p = this.pinInput.value.trim();
-    if (!u) { this.loginError.textContent="Selecciona usuario."; return; }
-    if (!this.users[u]||this.users[u].pin!==p) {
-      this.loginError.textContent="PIN inválido."; return;
+    const u = this.userSelect.value;
+    const p = this.pinInput.value.trim();
+
+    if (!u) {
+      this.loginError.textContent = "Selecciona usuario.";
+      return;
     }
-    this.loginError.textContent="";
+
+    // ─── Guest bypasses the PIN check ─────────────────
+    if (u !== "Guest") {
+      if (!this.users[u] || this.users[u].pin !== p) {
+        this.loginError.textContent = "PIN inválido.";
+        return;
+      }
+    }
+    // ──────────────────────────────────────────────────
+
+    this.loginError.textContent = "";
     this.currentUser = u;
     sessionStorage.setItem("currentUser", u);
     this._showLobby();
   }
+  _registerUser() {
+    const name = this.newUser.value.trim();
+    const pin  = this.newPin.value.trim();
+    if (!name || !pin) {
+      alert("Introduce usuario y PIN para registrar.");
+      return;
+    }
+    if (this.users[name]) {
+      alert("¡Ese usuario ya existe!");
+      return;
+    }
+    // 1) add to users
+    this.users[name] = {
+      pin,
+      score: 0,
+      mastered: {},
+      lastWords: [],
+      lastCorrect: []
+    };
+    // 2) persist and update the <select>
+    this._saveData();
+    const opt = document.createElement("option");
+    opt.value       = name;
+    opt.textContent = name;
+    this.userSelect.appendChild(opt);
+
+    // clear form
+    this.newUser.value = "";
+    this.newPin.value  = "";
+    alert("Usuario registrado. ¡Ahora inicia sesión!");
+  }
+
   _showLobby() {
     this.loginScreen .classList.add("hidden");
     this.lobbyScreen .classList.remove("hidden");
