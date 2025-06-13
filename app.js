@@ -270,21 +270,17 @@ startQuiz() {
   this.scoreDisp.textContent    = u.score;
   this.progressFill.style.width = "0%";
   this._renderQuiz();
-}
+
 
 
   // 6) final trim (in case of pathological cases)
   roundWords = roundWords.slice(0, 5);
 
-  // 7) save & prep state
+ // 7) save & prep state
   udata.lastWords = roundWords;
   this._saveData();
 
-  this.currentSet = window.vocab.filter(v => roundWords.includes(v.word));
-  this.matched    = new Set();
-  this.errors     = new Set();
-
-  // 8) UI transitions
+    // 8) UI transitions
   this.lobbyScreen  .classList.add("hidden");
   this.victoryScreen.classList.add("hidden");
   this.gameScreen   .classList.remove("hidden");
@@ -293,6 +289,14 @@ startQuiz() {
   this.scoreDisp.textContent    = udata.score;
   this.progressFill.style.width = "0%";
   this._renderQuiz();
+
+  this.currentSet = window.vocab.filter(v =>
+    roundWords.includes(v.word)
+  );
+  this.matched    = new Set();
+  this.errors     = new Set();
+
+
 
   // optional debug info
   console.log(
