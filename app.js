@@ -7,7 +7,6 @@ class SpanishVocabTrainer {
       Sorato: { pin:"2014", score:0, mastered:{}, lastWords:[] },
       Kaito:  { pin:"2015", score:0, mastered:{}, lastWords:[] },
       Maria:  { pin:"2019", score:0, mastered:{}, lastWords:[] }
-
     };
     this.goodLuck = [
       "¡Listo, pixelero! 🎮",
@@ -201,10 +200,6 @@ class SpanishVocabTrainer {
     this.currentSet = window.vocab.filter(v=>
       roundWords.includes(v.word)
     );
-    this.currentSet = this.currentSet.map(v => ({
-  ...v,
-  id: window.vocab.findIndex(x => x === v)   // each object’s unique index
-}));
     this.matched = new Set();
     this.errors  = new Set();
 
@@ -214,90 +209,72 @@ class SpanishVocabTrainer {
     this._renderQuiz();
   }
 
- _renderQuiz() {
-  this.emojiCol.innerHTML = "";
-  this.wordCol .innerHTML = "";
-
-  // EMOJI side
-  this.currentSet.forEach(item => {
-    const div = document.createElement("div");
-    div.className       = "box emojiBox";
-    div.textContent     = item.emoji;
-    div.dataset.id      = item.id;
-    div.onclick         = () => this._onEmoji(div);
-    this.emojiCol.appendChild(div);
-  });
-
-  // WORD side (shuffled!)
-  this._shuffle(this.currentSet).forEach(item => {
-    const div = document.createElement("div");
-    div.className       = "box wordBox";
-    div.textContent     = item.word;
-    div.dataset.id      = item.id;
-    div.onclick         = () => this._onWord(div);
-    this.wordCol.appendChild(div);
-  });
-}
-
-_onEmoji(div) {
-  const id = div.dataset.id;
-  if (this.matched.has(id)) {
-    // already matched: just replay audio
-    this._speak(div.textContent);
-    return;
-  }
-  // select it
-  this.emojiCol.querySelectorAll(".selected")
-    .forEach(x=>x.classList.remove("selected"));
-  div.classList.add("selected");
-  this.selectedEmoji = div;
-  this._speak(div.textContent);
-}
-
-_onWord(div) {
-  if (!this.selectedEmoji) return;
-  const guessId = this.selectedEmoji.dataset.id;
-  const wordId  = div.dataset.id;
-  if (guessId === wordId) this._handleCorrect(div, guessId);
-  else                    this._handleWrong(div);
-}
-
-_handleCorrect(div, id) {
-  // mark matched by id now:
-  this.matched.add(id);
-
-  // fetch the item so we can speak the word & update score by word:
-  const item = this.currentSet.find(v=>v.id==id);
-  const u    = this.users[this.currentUser];
-  if (!this.errors.has(id)) {
-    u.score++;
-    u.mastered[item.word] = (u.mastered[item.word]||0) + 1;
-    this._saveData();
+  _renderQuiz() {
+    this.emojiCol.innerHTML = "";
+    this.wordCol.innerHTML  = "";
+    // emojis
+    this.currentSet.forEach(({emoji,word})=>{
+      const d = document.createElement("div");
+      d.className = "box emojiBox";
+      d.textContent = emoji;
+      d.dataset.word = word;
+      d.onclick = ()=>this._onEmoji(d,word);
+      this.emojiCol.appendChild(d);
+    });
+    // words
+    this._shuffle(this.currentSet).forEach(({word})=>{
+      const d = document.createElement("div");
+      d.className = "box wordBox";
+      d.textContent = word;
+      d.onclick = ()=>this._onWord(d,word);
+      this.wordCol.appendChild(d);
+    });
   }
 
-  // update UI…
-  this.scoreDisp.textContent       = u.score;
-  this.selectedEmoji.classList.replace("selected","matched");
-  div.classList.add("matched","highlight");
-  this.selectedEmoji = null;
-
-  const pct = this.matched.size / this.currentSet.length * 100;
-  this.progressFill.style.width = pct + "%";
-
-  this._soundCorrect();
-  if (this.matched.size === this.currentSet.length) {
-    setTimeout(()=>this.finishQuiz(), 300);
+  _onEmoji(div,word) {
+    if (this.matched.has(word)) { this._speak(word); return; }
+    this.emojiCol.querySelectorAll(".selected")
+      .forEach(x=>x.classList.remove("selected"));
+    div.classList.add("selected");
+    this.selectedEmoji = div;
+    this._speak(word);
   }
-}
 
-_handleWrong(div) {
-  const id = div.dataset.id;
-  this.errors.add(id);
-  div.classList.add("incorrect");
-  setTimeout(()=>div.classList.remove("incorrect"), 300);
-  this._soundWrong();
-}
+  _onWord(div,word) {
+    if (!this.selectedEmoji) return;
+    const guess = this.selectedEmoji.dataset.word;
+    if (guess===word) this._correct(div,word);
+    else               this._wrong(div);
+  }
 
+  _correct(div,word) {
+    this.matched.add(word);
+    const u = this.users[this.currentUser];
+    if (!this.errors.has(word)) {
+      u.score++;
+      u.mastered[word] = (u.mastered[word]||0) + 1;
+      this._saveData();
+    }
+    this.scoreDisp.textContent = u.score;
+    this.selectedEmoji.classList.replace("selected","matched");
+    div.classList.add("matched","highlight");
+    this.selectedEmoji = null;
+
+    const pct = this.matched.size / this.currentSet.length * 100;
+    this.progressFill.style.width = pct + "%";
+    this._soundCorrect();
+
+    if (this.matched.size === this.currentSet.length) {
+      setTimeout(()=>this.finishQuiz(), 300);
+    }
+  }
+
+  _wrong(div) {
+    this.errors.add(div.textContent);
+    div.classList.add("incorrect");
+    setTimeout(()=>div.classList.remove("incorrect"),300);
+    this._soundWrong();
+  }
 
   finishQuiz() {
     this.gameScreen   .classList.add("hidden");
