@@ -7,6 +7,9 @@ class SpanishVocabTrainer {
       Sorato: { pin:"2014", score:0, mastered:{}, lastWords:[] },
       Kaito:  { pin:"2015", score:0, mastered:{}, lastWords:[] },
       Maria:  { pin:"2019", score:0, mastered:{}, lastWords:[] }
+      EMIKA:  { pin:"2017", score:0, mastered:{}, lastWords:[] }
+      OKASAN:  { pin:"2025", score:0, mastered:{}, lastWords:[] }
+      GUEST1234:  { pin:"1234", score:0, mastered:{}, lastWords:[] }
     };
     this.goodLuck = [
       "¡Listo, pixelero! 🎮",
