@@ -142,7 +142,7 @@ window.vocab = [
   { "emoji": "🐕", "word": "cachorro", "type": "noun" },
   { "emoji": "🐈", "word": "gatito", "type": "noun" },
   { "emoji": "🦤", "word": "dodo", "type": "noun" },
-  { "emoji": "🦪", "word": "ostra", "type": "noun" }
+  { "emoji": "🦪", "word": "ostra", "type": "noun" },
   { "emoji": "✋", "word": "mano", "type": "noun" },
   { "emoji": "👁️", "word": "ojo", "type": "noun" },
   { "emoji": "👂", "word": "oreja", "type": "noun" },
@@ -192,7 +192,7 @@ window.vocab = [
   { "emoji": "🦷", "word": "encía", "type": "noun" },
   { "emoji": "👄", "word": "labio", "type": "noun" },
   { "emoji": "👁️", "word": "párpado", "type": "noun" },
-  { "emoji": "👩‍🦰", "word": "ceja", "type": "noun" }
+  { "emoji": "👩‍🦰", "word": "ceja", "type": "noun" },
   { "emoji": "👕", "word": "camisa", "type": "noun" },
   { "emoji": "👖", "word": "pantalones", "type": "noun" },
   { "emoji": "👔", "word": "corbata", "type": "noun" },
@@ -252,7 +252,7 @@ window.vocab = [
   { "emoji": "🧑‍🎤", "word": "disfraz", "type": "noun" },
   { "emoji": "🧑‍🏭", "word": "overol", "type": "noun" },
   { "emoji": "🧑‍✈️", "word": "traje de piloto", "type": "noun" },
-  { "emoji": "🧑‍🚀", "word": "traje espacial", "type": "noun" }
+  { "emoji": "🧑‍🚀", "word": "traje espacial", "type": "noun" },
   { "emoji": "🔴", "word": "rojo", "type": "adjective" },
   { "emoji": "🟢", "word": "verde", "type": "adjective" },
   { "emoji": "🔵", "word": "azul", "type": "adjective" },
