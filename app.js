@@ -108,8 +108,7 @@ class SpanishVocabTrainer {
   _setupVoices() {
     this.voices = [];
     const load = () => {
-      this.voices = speechSynthesis.getVoices()
-        .filter(v=>v.lang.startsWith("es"));
+      this.voices = speechSynthesis.getVoices().filter(v=>v.lang.startsWith("es"));
     };
     speechSynthesis.onvoiceschanged = load;
     load();
@@ -130,7 +129,6 @@ class SpanishVocabTrainer {
   _restoreSession() {
     const theme = localStorage.getItem("theme") || "light";
     document.body.setAttribute("data-theme", theme);
-
     const u = sessionStorage.getItem("currentUser");
     if (u && this.users[u]) {
       this.currentUser = u;
@@ -187,12 +185,10 @@ class SpanishVocabTrainer {
       lastCorrect: []
     };
     this._saveData();
-
     const opt = document.createElement("option");
     opt.value       = name;
     opt.textContent = name;
     this.userSelect.appendChild(opt);
-
     this.newUser.value = "";
     this.newPin.value  = "";
     alert("Usuario registrado. ¡Ahora inicia sesión!");
@@ -227,7 +223,7 @@ class SpanishVocabTrainer {
   startQuiz() {
     const u = this.users[this.currentUser];
 
-    // 1) pool of words with <10 mastered
+    // 1) pool of words mastered <10×
     let pool = window.vocab
       .filter(v => (u.mastered[v.word]||0) < 10)
       .map(v => v.word);
@@ -235,12 +231,12 @@ class SpanishVocabTrainer {
     // 2) carry first two most recent correct
     const carry = u.lastCorrect.filter(w => pool.includes(w)).slice(0,2);
 
-    // 3) remove carry, shuffle remainder, pick new
+    // 3) remove carry, shuffle, pick new
     pool = pool.filter(w => !carry.includes(w));
     const need    = 5 - carry.length;
-    const pickNew = this._shuffle(pool).slice(0, need);
+    const pickNew = this._shuffle(pool).slice(0,need);
 
-    // 4) combine & save
+    // 4) combine & save rotation
     const roundWords = [...carry, ...pickNew];
     u.lastWords = roundWords;
     this._saveData();
@@ -255,7 +251,7 @@ class SpanishVocabTrainer {
     this.victoryScreen.classList.add("hidden");
     this.gameScreen  .classList.remove("hidden");
 
-    // 7) reset UI
+    // 7) reset UI & render
     this.scoreDisp.textContent    = u.score;
     this.progressFill.style.width = "0%";
     this._renderQuiz();
@@ -265,7 +261,7 @@ class SpanishVocabTrainer {
     this.emojiCol.innerHTML = "";
     this.wordCol.innerHTML  = "";
 
-    // emojis (fixed order)
+    // emojis (fixed)
     this.currentSet.forEach(({emoji,word}) => {
       const d = document.createElement("div");
       d.className    = "box emojiBox";
@@ -285,7 +281,7 @@ class SpanishVocabTrainer {
     });
   }
 
-  _onEmoji(div, word) {
+  _onEmoji(div,word) {
     if (this.matched.has(word)) { this._speak(word); return; }
     this.emojiCol.querySelectorAll(".selected")
       .forEach(x=>x.classList.remove("selected"));
@@ -294,14 +290,14 @@ class SpanishVocabTrainer {
     this._speak(word);
   }
 
-  _onWord(div, word) {
+  _onWord(div,word) {
     if (!this.selectedEmoji) return;
     const guess = this.selectedEmoji.dataset.word;
     if (guess === word) this._correct(div,word);
     else                 this._wrong(div);
   }
 
-  _correct(div, word) {
+  _correct(div,word) {
     this.matched.add(word);
     const u = this.users[this.currentUser];
 
@@ -327,3 +323,49 @@ class SpanishVocabTrainer {
     this._soundCorrect();
 
     if (this.matched.size === this.currentSet.length) {
+      setTimeout(()=>this.finishQuiz(), 300);
+    }
+  }
+
+  finishQuiz() {
+    this.gameScreen   .classList.add("hidden");
+    this.victoryScreen.classList.remove("hidden");
+    this.victoryMessage.textContent =
+      this.wellDone[Math.floor(Math.random()*this.wellDone.length)];
+    this._soundFinish();
+    confetti({ particleCount:200, spread:100 });
+  }
+
+  _wrong(div) {
+    this.errors.add(div.textContent);
+    div.classList.add("incorrect");
+    setTimeout(()=>div.classList.remove("incorrect"),300);
+    this._soundWrong();
+  }
+
+  _gameToLobby() {
+    this.victoryScreen .classList.add("hidden");
+    this.lobbyScreen   .classList.remove("hidden");
+    this._updateLeaderboard();
+  }
+
+  _updateLeaderboard() {
+    const html = Object.entries(this.users)
+      .sort((a,b)=>b[1].score - a[1].score)
+      .map(([u,d])=>`<li>${u}: ${d.score}</li>`)
+      .join("");
+    this.leaderList.innerHTML = html;
+  }
+
+  _shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.random() * (i + 1) | 0;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () =>
+  new SpanishVocabTrainer()
+);
