@@ -413,7 +413,7 @@ window.vocab = [
   { "emoji": "🥣", "word": "tazón", "type": "noun" },
   { "emoji": "🥤", "word": "vaso", "type": "noun" },
   { "emoji": "🍴", "word": "tenedor", "type": "noun" },
-  { "emoji": "🔪", "word": "cuchillo", "type": "noun" }
+  { "emoji": "🔪", "word": "cuchillo", "type": "noun" },
   { "emoji": "👩‍⚕️", "word": "doctora", "type": "noun" },
   { "emoji": "👨‍⚕️", "word": "doctor", "type": "noun" },
   { "emoji": "👩‍🏫", "word": "profesora", "type": "noun" },
