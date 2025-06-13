@@ -2,11 +2,11 @@ class SpanishVocabTrainer {
   constructor() {
     // 1) preset users
     this.users = {
-      Tony:   { pin: "1984", score: 0, mastered: {}, lastWords: [], lastCorrect: [] },
-      Mina:   { pin: "1982", score: 0, mastered: {}, lastWords: [], lastCorrect: [] },
-      Sorato: { pin: "2014", score: 0, mastered: {}, lastWords: [], lastCorrect: [] },
-      Kaito:  { pin: "2015", score: 0, mastered: {}, lastWords: [], lastCorrect: [] },
-      Maria:  { pin: "2019", score: 0, mastered: {}, lastWords: [], lastCorrect: [] }
+      Tony:   { pin:"1984", score:0, mastered:{}, lastWords:[], lastCorrect:[] },
+      Mina:   { pin:"1982", score:0, mastered:{}, lastWords:[], lastCorrect:[] },
+      Sorato: { pin:"2014", score:0, mastered:{}, lastWords:[], lastCorrect:[] },
+      Kaito:  { pin:"2015", score:0, mastered:{}, lastWords:[], lastCorrect:[] },
+      Maria:  { pin:"2019", score:0, mastered:{}, lastWords:[], lastCorrect:[] }
     };
 
     this.goodLuck = [
@@ -20,11 +20,9 @@ class SpanishVocabTrainer {
       "¡Súper 8-bit! 🌟"
     ];
 
-    // 2) grab all the DOM nodes
+    // bind + init
     this._bindElements();
-    // 3) wire up events
     this._hookEvents();
-    // 4) audio / voices / persistence
     this._initAudio();
     this._setupVoices();
     this._loadData();
@@ -33,52 +31,52 @@ class SpanishVocabTrainer {
 
   _bindElements() {
     const $ = id => document.getElementById(id);
-    this.loginScreen    = $("loginScreen");
-    this.userSelect     = $("userSelect");
-    this.pinInput       = $("pinInput");
-    this.loginBtn       = $("loginBtn");
-    this.loginError     = $("loginError");
-  // ─── NEW registration controls ─────────────────
-    this.newUser      = $("newUser");
-    this.newPin       = $("newPin");
-    this.registerBtn  = $("registerBtn");
-    // ───────────────────────────────────────────────
+    this.loginScreen     = $("loginScreen");
+    this.userSelect      = $("userSelect");
+    this.pinInput        = $("pinInput");
+    this.loginBtn        = $("loginBtn");
+    this.loginError      = $("loginError");
 
-    this.lobbyScreen    = $("lobbyScreen");
-    this.leaderList     = $("leaderList");
-    this.startGameBtn   = $("startGameBtn");
-    this.logoutBtn      = $("logoutBtn");
+    // registration controls
+    this.newUser         = $("newUser");
+    this.newPin          = $("newPin");
+    this.registerBtn     = $("registerBtn");
 
-    this.gameScreen     = $("gameScreen");
-    this.gameQuitBtn    = $("gameQuitBtn");
-    this.emojiCol       = $("emojiColumn");
-    this.wordCol        = $("wordColumn");
-    this.scoreDisp      = $("scoreDisplay");
-    this.progressFill   = $("progressFill");
+    this.lobbyScreen     = $("lobbyScreen");
+    this.leaderList      = $("leaderList");
+    this.startGameBtn    = $("startGameBtn");
+    this.logoutBtn       = $("logoutBtn");
 
-    this.victoryScreen  = $("victoryScreen");
-    this.victoryMessage = $("victoryMessage");
-    this.continueBtn    = $("continueBtn");
-    this.quitVictoryBtn = $("quitVictoryBtn");
+    this.gameScreen      = $("gameScreen");
+    this.gameQuitBtn     = $("gameQuitBtn");
+    this.emojiCol        = $("emojiColumn");
+    this.wordCol         = $("wordColumn");
+    this.scoreDisp       = $("scoreDisplay");
+    this.progressFill    = $("progressFill");
 
-    this.themeToggle    = $("themeToggle");
+    this.victoryScreen   = $("victoryScreen");
+    this.victoryMessage  = $("victoryMessage");
+    this.continueBtn     = $("continueBtn");
+    this.quitVictoryBtn  = $("quitVictoryBtn");
+
+    this.themeToggle     = $("themeToggle");
   }
 
   _hookEvents() {
-    this.loginBtn.onclick     = () => this._doLogin();
-    this.pinInput.onkeypress  = e => { if (e.key === "Enter") this._doLogin(); };
-    this.startGameBtn .onclick = () => this._showLobbyToGame();
-    this.logoutBtn    .onclick = () => this._logout();
-    this.gameQuitBtn  .onclick = () => this._quitToLobby();
-    this.continueBtn  .onclick = () => this._gameToLobby();
+    this.loginBtn.onclick       = () => this._doLogin();
+    this.pinInput.onkeypress    = e => { if (e.key === "Enter") this._doLogin(); };
+    this.registerBtn.onclick    = () => this._registerUser();
+
+    this.startGameBtn.onclick   = () => this._showLobbyToGame();
+    this.logoutBtn.onclick      = () => this._logout();
+    this.gameQuitBtn.onclick    = () => this._quitToLobby();
+    this.continueBtn.onclick    = () => this._gameToLobby();
     this.quitVictoryBtn.onclick = () => this._gameToLobby();
-    this.themeToggle  .onclick = () => this._toggleTheme();
-  // ─── wire up the Register button ───────────────
-    this.registerBtn.onclick  = () => this._registerUser();
-    // ───────────────────────────────────────────────
+
+    this.themeToggle.onclick    = () => this._toggleTheme();
   }
 
-  /* ───── Audio Setup ───────────────────────────────────────── */
+  // ───── Audio ──────────────────────────────────────────────
   _initAudio() {
     try { this.audioCtx = new (AudioContext||webkitAudioContext)(); }
     catch { this.audioCtx = null; }
@@ -92,9 +90,7 @@ class SpanishVocabTrainer {
     osc.connect(gain); gain.connect(this.audioCtx.destination);
     osc.start();
     gain.gain.setValueAtTime(1, this.audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(
-      0.001, this.audioCtx.currentTime + dur
-    );
+    gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + dur);
     osc.stop(this.audioCtx.currentTime + dur);
   }
   _soundCorrect() { this._playTone(880,0.1,"square"); }
@@ -108,12 +104,11 @@ class SpanishVocabTrainer {
     );
   }
 
-  /* ───── SpeechSynthesis ───────────────────────────────────── */
+  // ───── Speech ─────────────────────────────────────────────
   _setupVoices() {
     this.voices = [];
     const load = () => {
-      this.voices = speechSynthesis
-        .getVoices()
+      this.voices = speechSynthesis.getVoices()
         .filter(v=>v.lang.startsWith("es"));
     };
     speechSynthesis.onvoiceschanged = load;
@@ -126,17 +121,16 @@ class SpanishVocabTrainer {
     speechSynthesis.speak(utt);
   }
 
-  /* ───── Theme & Persistence ───────────────────────────────── */
+  // ───── Theme & Storage ────────────────────────────────────
   _toggleTheme() {
-    const t = document.body.getAttribute("data-theme")==="dark"
-      ? "light"
-      : "dark";
+    const t = document.body.getAttribute("data-theme")==="dark" ? "light" : "dark";
     document.body.setAttribute("data-theme", t);
     localStorage.setItem("theme", t);
   }
   _restoreSession() {
     const theme = localStorage.getItem("theme") || "light";
     document.body.setAttribute("data-theme", theme);
+
     const u = sessionStorage.getItem("currentUser");
     if (u && this.users[u]) {
       this.currentUser = u;
@@ -154,32 +148,26 @@ class SpanishVocabTrainer {
     localStorage.setItem("users", JSON.stringify(this.users));
   }
 
-  /* ───── Login / Lobby Transitions ─────────────────────────── */
+  // ───── Auth & Lobby ──────────────────────────────────────
   _doLogin() {
     const u = this.userSelect.value;
     const p = this.pinInput.value.trim();
-
     if (!u) {
       this.loginError.textContent = "Selecciona usuario.";
       return;
     }
-
-    // ─── Guest bypasses the PIN check ─────────────────
     if (u !== "Guest") {
       if (!this.users[u] || this.users[u].pin !== p) {
         this.loginError.textContent = "PIN inválido.";
         return;
       }
     }
-    // ───────────────────────────────────────────────
-
     this.loginError.textContent = "";
     this.currentUser = u;
     sessionStorage.setItem("currentUser", u);
     this._showLobby();
   }
 
-  // ─── NEW standalone register method ───────────────────
   _registerUser() {
     const name = this.newUser.value.trim();
     const pin  = this.newPin.value.trim();
@@ -191,23 +179,20 @@ class SpanishVocabTrainer {
       alert("¡Ese usuario ya existe!");
       return;
     }
-    // add new user
     this.users[name] = {
       pin,
-      score:      0,
-      mastered:   {},
-      lastWords:  [],
-      lastCorrect:[]
+      score:       0,
+      mastered:    {},
+      lastWords:   [],
+      lastCorrect: []
     };
     this._saveData();
 
-    // update <select>
     const opt = document.createElement("option");
     opt.value       = name;
     opt.textContent = name;
     this.userSelect.appendChild(opt);
 
-    // clear inputs
     this.newUser.value = "";
     this.newPin.value  = "";
     alert("Usuario registrado. ¡Ahora inicia sesión!");
@@ -220,121 +205,87 @@ class SpanishVocabTrainer {
     this.victoryScreen.classList.add("hidden");
     this._updateLeaderboard();
   }
+
   _showLobbyToGame() {
-    this.lobbyScreen .classList.add("hidden");
+    this.lobbyScreen.classList.add("hidden");
     this.startQuiz();
   }
+
   _logout() {
     this._saveData();
     sessionStorage.removeItem("currentUser");
     location.reload();
   }
 
-  /* ───── Quiz Start / Rotation ─────────────────────────────── */
-startQuiz() {
-  const u = this.users[this.currentUser];
+  _quitToLobby() {
+    this.gameScreen .classList.add("hidden");
+    this.lobbyScreen.classList.remove("hidden");
+    this._updateLeaderboard();
+  }
 
-  // 1) pool of all words mastered <10×
-  let pool = window.vocab
-    .filter(v => (u.mastered[v.word]||0) < 10)
-    .map(v => v.word);
+  // ───── Quiz Logic ─────────────────────────────────────────
+  startQuiz() {
+    const u = this.users[this.currentUser];
 
-  // 2) carry the *first* two items from lastCorrect that are still in pool
-  const carry = u.lastCorrect
-    .filter(w => pool.includes(w))
-    .slice(0, 2);
+    // 1) pool of words with <10 mastered
+    let pool = window.vocab
+      .filter(v => (u.mastered[v.word]||0) < 10)
+      .map(v => v.word);
 
-  // 3) remove those from pool, shuffle the rest, pick as many as needed
-  pool = pool.filter(w => !carry.includes(w));
-  const need = 5 - carry.length;
-  const pickNew = this._shuffle(pool).slice(0, need);
+    // 2) carry first two most recent correct
+    const carry = u.lastCorrect.filter(w => pool.includes(w)).slice(0,2);
 
-  // 4) combine & slice to 5 just in case
-  const roundWords = [...carry, ...pickNew].slice(0, 5);
+    // 3) remove carry, shuffle remainder, pick new
+    pool = pool.filter(w => !carry.includes(w));
+    const need    = 5 - carry.length;
+    const pickNew = this._shuffle(pool).slice(0, need);
 
-  // 5) save & render
-  u.lastWords = roundWords;
-  this._saveData();
+    // 4) combine & save
+    const roundWords = [...carry, ...pickNew];
+    u.lastWords = roundWords;
+    this._saveData();
 
-  this.currentSet = window.vocab.filter(v =>
-    roundWords.includes(v.word)
-  );
-  this.matched = new Set();
-  this.errors  = new Set();
+    // 5) prepare state
+    this.currentSet = window.vocab.filter(v => roundWords.includes(v.word));
+    this.matched    = new Set();
+    this.errors     = new Set();
 
-  // hide lobby, show game…
-  this.lobbyScreen.classList.add("hidden");
-  this.victoryScreen.classList.add("hidden");
-  this.gameScreen.classList.remove("hidden");
+    // 6) show game
+    this.lobbyScreen .classList.add("hidden");
+    this.victoryScreen.classList.add("hidden");
+    this.gameScreen  .classList.remove("hidden");
 
-  this.scoreDisp.textContent    = u.score;
-  this.progressFill.style.width = "0%";
-  this._renderQuiz();
-
-
-
-  // 6) final trim (in case of pathological cases)
-  roundWords = roundWords.slice(0, 5);
-
- // 7) save & prep state
-  udata.lastWords = roundWords;
-  this._saveData();
-
-    // 8) UI transitions
-  this.lobbyScreen  .classList.add("hidden");
-  this.victoryScreen.classList.add("hidden");
-  this.gameScreen   .classList.remove("hidden");
-
-  // 9) reset score/progress & render
-  this.scoreDisp.textContent    = udata.score;
-  this.progressFill.style.width = "0%";
-  this._renderQuiz();
-
-  this.currentSet = window.vocab.filter(v =>
-    roundWords.includes(v.word)
-  );
-  this.matched    = new Set();
-  this.errors     = new Set();
-
-
-
-  // optional debug info
-  console.log(
-    "✏️ startQuiz:",
-    "pool=", poolWords.length,
-    "carry=", carry.length,
-    "new=", pickNew.length,
-    "round=", roundWords.length,
-    roundWords
-  );
-}
-
-
-
+    // 7) reset UI
+    this.scoreDisp.textContent    = u.score;
+    this.progressFill.style.width = "0%";
+    this._renderQuiz();
+  }
 
   _renderQuiz() {
     this.emojiCol.innerHTML = "";
     this.wordCol.innerHTML  = "";
-    // emojis
-    this.currentSet.forEach(({emoji,word})=>{
+
+    // emojis (fixed order)
+    this.currentSet.forEach(({emoji,word}) => {
       const d = document.createElement("div");
-      d.className = "box emojiBox";
-      d.textContent = emoji;
+      d.className    = "box emojiBox";
+      d.textContent  = emoji;
       d.dataset.word = word;
-      d.onclick = ()=>this._onEmoji(d,word);
+      d.onclick      = () => this._onEmoji(d,word);
       this.emojiCol.appendChild(d);
     });
-    // words
-    this._shuffle(this.currentSet).forEach(({word})=>{
+
+    // words (shuffled)
+    this._shuffle(this.currentSet).forEach(({word}) => {
       const d = document.createElement("div");
-      d.className = "box wordBox";
+      d.className   = "box wordBox";
       d.textContent = word;
-      d.onclick = ()=>this._onWord(d,word);
+      d.onclick     = () => this._onWord(d,word);
       this.wordCol.appendChild(d);
     });
   }
 
-  _onEmoji(div,word) {
+  _onEmoji(div, word) {
     if (this.matched.has(word)) { this._speak(word); return; }
     this.emojiCol.querySelectorAll(".selected")
       .forEach(x=>x.classList.remove("selected"));
@@ -343,21 +294,29 @@ startQuiz() {
     this._speak(word);
   }
 
-  _onWord(div,word) {
+  _onWord(div, word) {
     if (!this.selectedEmoji) return;
     const guess = this.selectedEmoji.dataset.word;
-    if (guess===word) this._correct(div,word);
-    else               this._wrong(div);
+    if (guess === word) this._correct(div,word);
+    else                 this._wrong(div);
   }
 
-  _correct(div,word) {
+  _correct(div, word) {
     this.matched.add(word);
     const u = this.users[this.currentUser];
+
     if (!this.errors.has(word)) {
       u.score++;
       u.mastered[word] = (u.mastered[word]||0) + 1;
+
+      // update lastCorrect rotation
+      const idx = u.lastCorrect.indexOf(word);
+      if (idx > -1) u.lastCorrect.splice(idx,1);
+      if (u.mastered[word] < 10) u.lastCorrect.unshift(word);
+
       this._saveData();
     }
+
     this.scoreDisp.textContent = u.score;
     this.selectedEmoji.classList.replace("selected","matched");
     div.classList.add("matched","highlight");
@@ -368,73 +327,3 @@ startQuiz() {
     this._soundCorrect();
 
     if (this.matched.size === this.currentSet.length) {
-      setTimeout(()=>this.finishQuiz(), 300);
-    }
-    _handleCorrect(div, word) 
-const udata = this.users[this.currentUser];
-
-  // … your existing score++ / mastered[word]++ …
-
-  // 1) remove this word if already in lastCorrect
-  const idx = u.lastCorrect.indexOf(word);
-  if (idx > -1) u.lastCorrect.splice(idx, 1);
-
-  // 2) if it's still under mastery, unshift to front
-  if (u.mastered[word] < 10) {
-    u.lastCorrect.unshift(word);
-  }
-
-  // 3) save
-  this._saveData();
-
-  // … the rest of your UI update / sound / finishQuiz() logic …
-}
-
-  }
-
-  _wrong(div) {
-    this.errors.add(div.textContent);
-    div.classList.add("incorrect");
-    setTimeout(()=>div.classList.remove("incorrect"),300);
-    this._soundWrong();
-  }
-
-  finishQuiz() {
-    this.gameScreen   .classList.add("hidden");
-    this.victoryScreen.classList.remove("hidden");
-    this.victoryMessage.textContent = 
-      this.wellDone[Math.floor(Math.random()*this.wellDone.length)];
-    this._soundFinish();
-    confetti({ particleCount:200, spread:100 });
-  }
-
-  _gameToLobby() {
-    this.victoryScreen .classList.add("hidden");
-    this.lobbyScreen   .classList.remove("hidden");
-    this._updateLeaderboard();
-  }
-  _quitToLobby() {
-    this.gameScreen  .classList.add("hidden");
-    this.lobbyScreen .classList.remove("hidden");
-    this._updateLeaderboard();
-  }
-
-  _updateLeaderboard() {
-    const html = Object.entries(this.users)
-      .sort((a,b)=>b[1].score - a[1].score)
-      .map(([u,d])=>`<li>${u}: ${d.score}</li>`)
-      .join("");
-    this.leaderList.innerHTML = html;
-  }
-
-  _shuffle(arr) {
-    for (let i=arr.length-1;i>0;i--) {
-      const j = Math.random()*(i+1)|0;
-      [arr[i],arr[j]] = [arr[j],arr[i]];
-    }
-    return arr;
-  }
-}
-document.addEventListener("DOMContentLoaded", () =>
-  new SpanishVocabTrainer()
-);
