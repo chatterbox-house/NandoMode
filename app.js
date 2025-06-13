@@ -2,11 +2,11 @@ class SpanishVocabTrainer {
   constructor() {
     // 1) preset users
     this.users = {
-      Tony:   { pin:"1984", score:0, mastered:{}, lastWords:[] },
-      Mina:   { pin:"1982", score:0, mastered:{}, lastWords:[] },
-      Sorato: { pin:"2014", score:0, mastered:{}, lastWords:[] },
-      Kaito:  { pin:"2015", score:0, mastered:{}, lastWords:[] },
-      Maria:  { pin:"2019", score:0, mastered:{}, lastWords:[] }
+      Tony:   { pin:"1984", score:0, mastered:{}, lastWords:[] lastCorrect:[] },
+      Mina:   { pin:"1982", score:0, mastered:{}, lastWords:[] lastCorrect:[] },
+      Sorato: { pin:"2014", score:0, mastered:{}, lastWords:[] lastCorrect:[] },
+      Kaito:  { pin:"2015", score:0, mastered:{}, lastWords:[] lastCorrect:[] },
+      Maria:  { pin:"2019", score:0, mastered:{}, lastWords:[] lastCorrect:[] }
     };
     this.goodLuck = [
       "¡Listo, pixelero! 🎮",
