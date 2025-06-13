@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>NandoMode – Vocab Retro Trainer</title>
+  <title>Entrar – NANDOmode</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
@@ -16,27 +16,37 @@
 
   <main>
     <!-- PAGE 1: LOGIN -->
-    <section id="loginScreen">
-      <h2>Iniciar Sesión</h2>
-      <div class="login-controls">
+    <section id="loginScreen">class="screen">
+    <div class="panel login-panel">
+      <h2>Iniciar sesión</h2>
+      <div class="form-group">
         <select id="userSelect">
-<input id="newUser"      type="text"     placeholder="Nuevo usuario">
-<input id="newPin"       type="password" placeholder="Nuevo PIN">
-<button id="registerBtn">Registrar</button>
-<select id="userSelect">
-  <option value="">— Usuario —</option>
-  <option value="Guest">Invitado</option>
-          <option value="Tony">Tony</option>
-          <option value="Mina">Mina</option>
-          <option value="Sorato">Sorato</option>
-          <option value="Kaito">Kaito</option>
-          <option value="Maria">Maria</option>
-
+          <option value="">— Selecciona usuario —</option>
+          <option value="Guest">Invitado</option>
         </select>
-        <input id="pinInput" type="password" placeholder="PIN">
+      </div>
+      <div class="form-group">
+        <input id="pinInput" type="password" placeholder="PIN" />
+      </div>
+      <div class="form-group">
         <button id="loginBtn">Entrar</button>
       </div>
       <div id="loginError" class="error"></div>
+    </div>
+
+    <div class="panel register-panel">
+      <h2>Registro</h2>
+      <div class="form-group">
+        <input id="newUser" type="text" placeholder="Nuevo usuario" />
+      </div>
+      <div class="form-group">
+        <input id="newPin" type="password" placeholder="Nuevo PIN" />
+      </div>
+      <div class="form-group">
+        <button id="registerBtn">Registrar</button>
+      </div>
+    </div>
+  </div>
 
 
     </section>
