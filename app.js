@@ -176,39 +176,46 @@ class SpanishVocabTrainer {
 
   /* ───── Quiz Start / Rotation ─────────────────────────────── */
 startQuiz() {
-  const udata = this.users[this.currentUser];
+  const u = this.users[this.currentUser];
 
-  // 1) build a de‐duped pool of all words <10× mastered
-  let poolWords = window.vocab
-    .filter(v => (udata.mastered[v.word]||0) < 10)
+  // 1) pool of all words mastered <10×
+  let pool = window.vocab
+    .filter(v => (u.mastered[v.word]||0) < 10)
     .map(v => v.word);
-  poolWords = Array.from(new Set(poolWords));
 
-  // 2) pick up to 2 random carry‐over words from last round
-  let carry = [];
-  if (Array.isArray(udata.lastWords) && udata.lastWords.length) {
-    const validLast = udata.lastWords.filter(w => poolWords.includes(w));
-    carry = this._shuffle(validLast).slice(0, 2);
-  }
+  // 2) carry the *first* two items from lastCorrect that are still in pool
+  const carry = u.lastCorrect
+    .filter(w => pool.includes(w))
+    .slice(0, 2);
 
-  // 3) remove carried words from pool then shuffle & pick new
-  let remainingPool = poolWords.filter(w => !carry.includes(w));
-  remainingPool = this._shuffle(remainingPool);
-
+  // 3) remove those from pool, shuffle the rest, pick as many as needed
+  pool = pool.filter(w => !carry.includes(w));
   const need = 5 - carry.length;
-  const pickNew = remainingPool.slice(0, need);
+  const pickNew = this._shuffle(pool).slice(0, need);
 
-  // 4) combine & force uniqueness
-  let roundWords = Array.from(new Set([...carry, ...pickNew]));
+  // 4) combine & slice to 5 just in case
+  const roundWords = [...carry, ...pickNew].slice(0, 5);
 
-  // 5) if for some reason we're still short (e.g. pool <5), top up:
-  if (roundWords.length < 5) {
-    let filler = remainingPool.filter(w => !roundWords.includes(w));
-    while (roundWords.length < 5 && filler.length) {
-      const idx = Math.floor(Math.random() * filler.length);
-      roundWords.push(...filler.splice(idx, 1));
-    }
-  }
+  // 5) save & render
+  u.lastWords = roundWords;
+  this._saveData();
+
+  this.currentSet = window.vocab.filter(v =>
+    roundWords.includes(v.word)
+  );
+  this.matched = new Set();
+  this.errors  = new Set();
+
+  // hide lobby, show game…
+  this.lobbyScreen.classList.add("hidden");
+  this.victoryScreen.classList.add("hidden");
+  this.gameScreen.classList.remove("hidden");
+
+  this.scoreDisp.textContent    = u.score;
+  this.progressFill.style.width = "0%";
+  this._renderQuiz();
+}
+
 
   // 6) final trim (in case of pathological cases)
   roundWords = roundWords.slice(0, 5);
