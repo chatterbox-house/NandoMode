@@ -241,51 +241,65 @@ class SpanishVocabTrainer {
   });
 }
 
+_onEmoji(div) {
+  const id = div.dataset.id;
+  if (this.matched.has(id)) {
+    // already matched: just replay audio
+    this._speak(div.textContent);
+    return;
+  }
+  // select it
+  this.emojiCol.querySelectorAll(".selected")
+    .forEach(x=>x.classList.remove("selected"));
+  div.classList.add("selected");
+  this.selectedEmoji = div;
+  this._speak(div.textContent);
+}
 
-  _onEmoji(div,word) {
-    if (this.matched.has(word)) { this._speak(word); return; }
-    this.emojiCol.querySelectorAll(".selected")
-      .forEach(x=>x.classList.remove("selected"));
-    div.classList.add("selected");
-    this.selectedEmoji = div;
-    this._speak(word);
+_onWord(div) {
+  if (!this.selectedEmoji) return;
+  const guessId = this.selectedEmoji.dataset.id;
+  const wordId  = div.dataset.id;
+  if (guessId === wordId) this._handleCorrect(div, guessId);
+  else                    this._handleWrong(div);
+}
+
+_handleCorrect(div, id) {
+  // mark matched by id now:
+  this.matched.add(id);
+
+  // fetch the item so we can speak the word & update score by word:
+  const item = this.currentSet.find(v=>v.id==id);
+  const u    = this.users[this.currentUser];
+  if (!this.errors.has(id)) {
+    u.score++;
+    u.mastered[item.word] = (u.mastered[item.word]||0) + 1;
+    this._saveData();
   }
 
-  _onWord(div,word) {
-    if (!this.selectedEmoji) return;
-    const guess = this.selectedEmoji.dataset.word;
-    if (guess===word) this._correct(div,word);
-    else               this._wrong(div);
+  // update UI…
+  this.scoreDisp.textContent       = u.score;
+  this.selectedEmoji.classList.replace("selected","matched");
+  div.classList.add("matched","highlight");
+  this.selectedEmoji = null;
+
+  const pct = this.matched.size / this.currentSet.length * 100;
+  this.progressFill.style.width = pct + "%";
+
+  this._soundCorrect();
+  if (this.matched.size === this.currentSet.length) {
+    setTimeout(()=>this.finishQuiz(), 300);
   }
+}
 
-  _correct(div,word) {
-    this.matched.add(word);
-    const u = this.users[this.currentUser];
-    if (!this.errors.has(word)) {
-      u.score++;
-      u.mastered[word] = (u.mastered[word]||0) + 1;
-      this._saveData();
-    }
-    this.scoreDisp.textContent = u.score;
-    this.selectedEmoji.classList.replace("selected","matched");
-    div.classList.add("matched","highlight");
-    this.selectedEmoji = null;
+_handleWrong(div) {
+  const id = div.dataset.id;
+  this.errors.add(id);
+  div.classList.add("incorrect");
+  setTimeout(()=>div.classList.remove("incorrect"), 300);
+  this._soundWrong();
+}
 
-    const pct = this.matched.size / this.currentSet.length * 100;
-    this.progressFill.style.width = pct + "%";
-    this._soundCorrect();
-
-    if (this.matched.size === this.currentSet.length) {
-      setTimeout(()=>this.finishQuiz(), 300);
-    }
-  }
-
-  _wrong(div) {
-    this.errors.add(div.textContent);
-    div.classList.add("incorrect");
-    setTimeout(()=>div.classList.remove("incorrect"),300);
-    this._soundWrong();
-  }
 
   finishQuiz() {
     this.gameScreen   .classList.add("hidden");
