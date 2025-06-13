@@ -37,6 +37,9 @@ class SpanishVocabTrainer {
     this.pinInput       = $("pinInput");
     this.loginBtn       = $("loginBtn");
     this.loginError     = $("loginError");
+      this.newUser      = $("newUser");
+  this.newPin       = $("newPin");
+  this.registerBtn  = $("registerBtn");
 
     this.lobbyScreen    = $("lobbyScreen");
     this.leaderList     = $("leaderList");
