@@ -2,12 +2,13 @@ class SpanishVocabTrainer {
   constructor() {
     // 1) preset users
     this.users = {
-      Tony:   { pin:"1984", score:0, mastered:{}, lastWords:[] lastCorrect:[] },
-      Mina:   { pin:"1982", score:0, mastered:{}, lastWords:[] lastCorrect:[] },
-      Sorato: { pin:"2014", score:0, mastered:{}, lastWords:[] lastCorrect:[] },
-      Kaito:  { pin:"2015", score:0, mastered:{}, lastWords:[] lastCorrect:[] },
-      Maria:  { pin:"2019", score:0, mastered:{}, lastWords:[] lastCorrect:[] }
+      Tony:   { pin: "1984", score: 0, mastered: {}, lastWords: [], lastCorrect: [] },
+      Mina:   { pin: "1982", score: 0, mastered: {}, lastWords: [], lastCorrect: [] },
+      Sorato: { pin: "2014", score: 0, mastered: {}, lastWords: [], lastCorrect: [] },
+      Kaito:  { pin: "2015", score: 0, mastered: {}, lastWords: [], lastCorrect: [] },
+      Maria:  { pin: "2019", score: 0, mastered: {}, lastWords: [], lastCorrect: [] }
     };
+
     this.goodLuck = [
       "¡Listo, pixelero! 🎮",
       "¡A por los puntos! ⭐",
@@ -37,9 +38,11 @@ class SpanishVocabTrainer {
     this.pinInput       = $("pinInput");
     this.loginBtn       = $("loginBtn");
     this.loginError     = $("loginError");
+  // ─── NEW registration controls ─────────────────
     this.newUser      = $("newUser");
     this.newPin       = $("newPin");
     this.registerBtn  = $("registerBtn");
+    // ───────────────────────────────────────────────
 
     this.lobbyScreen    = $("lobbyScreen");
     this.leaderList     = $("leaderList");
@@ -62,15 +65,17 @@ class SpanishVocabTrainer {
   }
 
   _hookEvents() {
-    this.loginBtn     .onclick = () => this._doLogin();
-    this.pinInput     .onkeypress = e => { if (e.key==="Enter") this._doLogin(); };
+    this.loginBtn.onclick     = () => this._doLogin();
+    this.pinInput.onkeypress  = e => { if (e.key === "Enter") this._doLogin(); };
     this.startGameBtn .onclick = () => this._showLobbyToGame();
     this.logoutBtn    .onclick = () => this._logout();
     this.gameQuitBtn  .onclick = () => this._quitToLobby();
     this.continueBtn  .onclick = () => this._gameToLobby();
     this.quitVictoryBtn.onclick = () => this._gameToLobby();
     this.themeToggle  .onclick = () => this._toggleTheme();
-    this.registerBtn.onclick = () => this._registerUser();
+  // ─── wire up the Register button ───────────────
+    this.registerBtn.onclick  = () => this._registerUser();
+    // ───────────────────────────────────────────────
   }
 
   /* ───── Audio Setup ───────────────────────────────────────── */
@@ -166,13 +171,15 @@ class SpanishVocabTrainer {
         return;
       }
     }
-    // ──────────────────────────────────────────────────
+    // ───────────────────────────────────────────────
 
     this.loginError.textContent = "";
     this.currentUser = u;
     sessionStorage.setItem("currentUser", u);
     this._showLobby();
   }
+
+  // ─── NEW standalone register method ───────────────────
   _registerUser() {
     const name = this.newUser.value.trim();
     const pin  = this.newPin.value.trim();
@@ -184,22 +191,23 @@ class SpanishVocabTrainer {
       alert("¡Ese usuario ya existe!");
       return;
     }
-    // 1) add to users
+    // add new user
     this.users[name] = {
       pin,
-      score: 0,
-      mastered: {},
-      lastWords: [],
-      lastCorrect: []
+      score:      0,
+      mastered:   {},
+      lastWords:  [],
+      lastCorrect:[]
     };
-    // 2) persist and update the <select>
     this._saveData();
+
+    // update <select>
     const opt = document.createElement("option");
     opt.value       = name;
     opt.textContent = name;
     this.userSelect.appendChild(opt);
 
-    // clear form
+    // clear inputs
     this.newUser.value = "";
     this.newPin.value  = "";
     alert("Usuario registrado. ¡Ahora inicia sesión!");
@@ -423,7 +431,6 @@ startQuiz() {
     return arr;
   }
 }
-
-document.addEventListener("DOMContentLoaded", ()=>
+document.addEventListener("DOMContentLoaded", () =>
   new SpanishVocabTrainer()
 );
