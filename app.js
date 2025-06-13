@@ -175,39 +175,52 @@ class SpanishVocabTrainer {
   }
 
   /* ───── Quiz Start / Rotation ─────────────────────────────── */
-  startQuiz() {
-    // hide other screens
-    this.victoryScreen.classList.add("hidden");
-    this.gameScreen   .classList.remove("hidden");
+startQuiz() {
+  const udata = this.users[this.currentUser];
 
-    const udata = this.users[this.currentUser];
-    // pool of <10 mastered
-    const pool = window.vocab.filter(
-      v => (udata.mastered[v.word]||0) < 10
-    );
-    // up to 2 carry-over
-    const carry = (udata.lastWords||[])
-      .filter(w=> pool.some(v=>v.word===w))
-      .slice(0,2);
-    const leftovers = pool.filter(v=>!carry.includes(v.word));
-    const pickNew  = this._shuffle(leftovers)
-      .slice(0,5-carry.length)
-      .map(v=>v.word);
-    const roundWords = [...carry, ...pickNew];
-    udata.lastWords = roundWords;
-    this._saveData();
+  // 1) pool of not-yet-mastered words
+  const pool = window.vocab.filter(v => (udata.mastered[v.word]||0) < 10);
 
-    this.currentSet = window.vocab.filter(v=>
-      roundWords.includes(v.word)
-    );
-    this.matched = new Set();
-    this.errors  = new Set();
+  // 2) carry-over up to 2 from last round
+  const carry = (udata.lastWords || [])
+    .filter(w => pool.some(v => v.word === w))
+    .slice(0, 2);
 
-    this.scoreDisp.textContent   = udata.score;
-    this.progressFill.style.width= "0%";
+  // 3) pick the rest new to make 5 total
+  const leftovers = pool.map(v => v.word)
+                        .filter(w => !carry.includes(w));
+  const pickNew = this._shuffle(leftovers)
+                      .slice(0, 5 - carry.length);
 
-    this._renderQuiz();
+  // 4) combine & de-dupe
+  let roundWords = [...carry, ...pickNew];
+  roundWords = Array.from(new Set(roundWords));
+
+  // 5) if anything got dropped (just in case), top up again
+  if (roundWords.length < 5) {
+    const more = this._shuffle(
+      leftovers.filter(w => !roundWords.includes(w))
+    ).slice(0, 5 - roundWords.length);
+    roundWords = [...roundWords, ...more];
   }
+
+  // 6) save and render
+  udata.lastWords = roundWords;
+  this._saveData();
+
+  this.currentSet = window.vocab.filter(v => roundWords.includes(v.word));
+  this.matched    = new Set();
+  this.errors     = new Set();
+
+  this.scoreDisp .textContent = udata.score;
+  this.progressFill.style.width = "0%";
+  this.messages.textContent = this.goodLuck[
+    Math.floor(Math.random() * this.goodLuck.length)
+  ];
+
+  this._renderQuiz();
+}
+
 
   _renderQuiz() {
     this.emojiCol.innerHTML = "";
