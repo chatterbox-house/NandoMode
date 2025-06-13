@@ -370,7 +370,7 @@ startQuiz() {
     if (this.matched.size === this.currentSet.length) {
       setTimeout(()=>this.finishQuiz(), 300);
     }
-    _handleCorrect(div, word) {
+    _handleCorrect(div, word) 
   const u = this.users[this.currentUser];
 
   // … your existing score++ / mastered[word]++ …
