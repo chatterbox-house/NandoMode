@@ -176,6 +176,9 @@ class SpanishVocabTrainer {
 
   /* ───── Quiz Start / Rotation ─────────────────────────────── */
 startQuiz() {
+  console.log("🔥 startQuiz() fired for user", this.currentUser);
+ this.lobbyScreen.classList.add("hidden");
+  this.gameScreen .classList.remove("hidden");
   const udata = this.users[this.currentUser];
 
   // 1) pool of not-yet-mastered words
