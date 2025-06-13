@@ -175,51 +175,48 @@ class SpanishVocabTrainer {
   }
 
   /* ───── Quiz Start / Rotation ─────────────────────────────── */
-startQuiz() {
-  console.log("🔥 startQuiz() fired for user", this.currentUser);
- this.lobbyScreen.classList.add("hidden");
-  this.gameScreen .classList.remove("hidden");
-  const udata = this.users[this.currentUser];
+  startQuiz() {
+    const udata = this.users[this.currentUser];
 
-  // 1) pool of not-yet-mastered words
-  const pool = window.vocab.filter(v => (udata.mastered[v.word]||0) < 10);
+    // 1) Build a flat list of all vocab words not yet mastered 10×
+    const pool = window.vocab
+      .filter(v => (udata.mastered[v.word]||0) < 10)
+      .map(v => v.word);
 
-  // 2) carry-over up to 2 from last round
-  const carry = (udata.lastWords || [])
-    .filter(w => pool.some(v => v.word === w))
-    .slice(0, 2);
+    // 2) Randomly carry over up to 2 from lastWords if still in pool
+    const last = (udata.lastWords || []).filter(w => pool.includes(w));
+    const carry = this._shuffle(last).slice(0, 2);
 
-  // 3) pick the rest new to make 5 total
-  const leftovers = pool.map(v => v.word)
-                        .filter(w => !carry.includes(w));
-  const pickNew = this._shuffle(leftovers)
-                      .slice(0, 5 - carry.length);
+    // 3) Remove carried words from pool, then shuffle & pick new
+    const leftover = pool.filter(w => !carry.includes(w));
+    const needed  = Math.max(0, 5 - carry.length);
+    const pickNew = this._shuffle(leftover).slice(0, needed);
 
-  // 4) combine & de-dupe
-  let roundWords = [...carry, ...pickNew];
-  roundWords = Array.from(new Set(roundWords));
+    // 4) Combine & ensure uniqueness (should already be unique)
+    const roundWords = [...carry, ...pickNew];
 
-  // 5) if anything got dropped (just in case), top up again
-  if (roundWords.length < 5) {
-    const more = this._shuffle(
-      leftovers.filter(w => !roundWords.includes(w))
-    ).slice(0, 5 - roundWords.length);
-    roundWords = [...roundWords, ...more];
+    // 5) Save for next carry calculation
+    udata.lastWords = roundWords;
+    this._saveData();
+
+    // 6) Build your currentSet and reset state
+    this.currentSet = window.vocab.filter(v => roundWords.includes(v.word));
+    this.matched    = new Set();
+    this.errors     = new Set();
+
+    // 7) Show the game screen & hide others
+    this.lobbyScreen .classList.add("hidden");
+    this.victoryScreen .classList.add("hidden");
+    this.gameScreen  .classList.remove("hidden");
+
+    // 8) Reset score/progress
+    this.scoreDisp.textContent    = udata.score;
+    this.progressFill.style.width = "0%";
+
+    // 9) Render the 5 boxes
+    this._renderQuiz();
   }
 
-  // 6) save and render
-  udata.lastWords = roundWords;
-  this._saveData();
-
-  this.currentSet = window.vocab.filter(v => roundWords.includes(v.word));
-  this.matched    = new Set();
-  this.errors     = new Set();
-
-  this.scoreDisp .textContent = udata.score;
-  this.progressFill.style.width = "0%";
-
-  this._renderQuiz();
-}
 
 
   _renderQuiz() {
