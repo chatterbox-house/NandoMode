@@ -216,27 +216,31 @@ class SpanishVocabTrainer {
     this._renderQuiz();
   }
 
-  _renderQuiz() {
-    this.emojiCol.innerHTML = "";
-    this.wordCol.innerHTML  = "";
-    // emojis
-    this.currentSet.forEach(({emoji,word})=>{
-      const d = document.createElement("div");
-      d.className = "box emojiBox";
-      d.textContent = emoji;
-      d.dataset.word = word;
-      d.onclick = ()=>this._onEmoji(d,word);
-      this.emojiCol.appendChild(d);
-    });
-    // words
-    this._shuffle(this.currentSet).forEach(({word})=>{
-      const d = document.createElement("div");
-      d.className = "box wordBox";
-      d.textContent = word;
-      d.onclick = ()=>this._onWord(d,word);
-      this.wordCol.appendChild(d);
-    });
-  }
+ _renderQuiz() {
+  this.emojiCol.innerHTML = "";
+  this.wordCol .innerHTML = "";
+
+  // EMOJI side
+  this.currentSet.forEach(item => {
+    const div = document.createElement("div");
+    div.className       = "box emojiBox";
+    div.textContent     = item.emoji;
+    div.dataset.id      = item.id;
+    div.onclick         = () => this._onEmoji(div);
+    this.emojiCol.appendChild(div);
+  });
+
+  // WORD side (shuffled!)
+  this._shuffle(this.currentSet).forEach(item => {
+    const div = document.createElement("div");
+    div.className       = "box wordBox";
+    div.textContent     = item.word;
+    div.dataset.id      = item.id;
+    div.onclick         = () => this._onWord(div);
+    this.wordCol.appendChild(div);
+  });
+}
+
 
   _onEmoji(div,word) {
     if (this.matched.has(word)) { this._speak(word); return; }
