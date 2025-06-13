@@ -175,47 +175,73 @@ class SpanishVocabTrainer {
   }
 
   /* ───── Quiz Start / Rotation ─────────────────────────────── */
-  startQuiz() {
-    const udata = this.users[this.currentUser];
+startQuiz() {
+  const udata = this.users[this.currentUser];
 
-    // 1) Build a flat list of all vocab words not yet mastered 10×
-    const pool = window.vocab
-      .filter(v => (udata.mastered[v.word]||0) < 10)
-      .map(v => v.word);
+  // 1) build a de‐duped pool of all words <10× mastered
+  let poolWords = window.vocab
+    .filter(v => (udata.mastered[v.word]||0) < 10)
+    .map(v => v.word);
+  poolWords = Array.from(new Set(poolWords));
 
-    // 2) Randomly carry over up to 2 from lastWords if still in pool
-    const last = (udata.lastWords || []).filter(w => pool.includes(w));
-    const carry = this._shuffle(last).slice(0, 2);
-
-    // 3) Remove carried words from pool, then shuffle & pick new
-    const leftover = pool.filter(w => !carry.includes(w));
-    const needed  = Math.max(0, 5 - carry.length);
-    const pickNew = this._shuffle(leftover).slice(0, needed);
-
-    // 4) Combine & ensure uniqueness (should already be unique)
-    const roundWords = [...carry, ...pickNew];
-
-    // 5) Save for next carry calculation
-    udata.lastWords = roundWords;
-    this._saveData();
-
-    // 6) Build your currentSet and reset state
-    this.currentSet = window.vocab.filter(v => roundWords.includes(v.word));
-    this.matched    = new Set();
-    this.errors     = new Set();
-
-    // 7) Show the game screen & hide others
-    this.lobbyScreen .classList.add("hidden");
-    this.victoryScreen .classList.add("hidden");
-    this.gameScreen  .classList.remove("hidden");
-
-    // 8) Reset score/progress
-    this.scoreDisp.textContent    = udata.score;
-    this.progressFill.style.width = "0%";
-
-    // 9) Render the 5 boxes
-    this._renderQuiz();
+  // 2) pick up to 2 random carry‐over words from last round
+  let carry = [];
+  if (Array.isArray(udata.lastWords) && udata.lastWords.length) {
+    const validLast = udata.lastWords.filter(w => poolWords.includes(w));
+    carry = this._shuffle(validLast).slice(0, 2);
   }
+
+  // 3) remove carried words from pool then shuffle & pick new
+  let remainingPool = poolWords.filter(w => !carry.includes(w));
+  remainingPool = this._shuffle(remainingPool);
+
+  const need = 5 - carry.length;
+  const pickNew = remainingPool.slice(0, need);
+
+  // 4) combine & force uniqueness
+  let roundWords = Array.from(new Set([...carry, ...pickNew]));
+
+  // 5) if for some reason we're still short (e.g. pool <5), top up:
+  if (roundWords.length < 5) {
+    let filler = remainingPool.filter(w => !roundWords.includes(w));
+    while (roundWords.length < 5 && filler.length) {
+      const idx = Math.floor(Math.random() * filler.length);
+      roundWords.push(...filler.splice(idx, 1));
+    }
+  }
+
+  // 6) final trim (in case of pathological cases)
+  roundWords = roundWords.slice(0, 5);
+
+  // 7) save & prep state
+  udata.lastWords = roundWords;
+  this._saveData();
+
+  this.currentSet = window.vocab.filter(v => roundWords.includes(v.word));
+  this.matched    = new Set();
+  this.errors     = new Set();
+
+  // 8) UI transitions
+  this.lobbyScreen  .classList.add("hidden");
+  this.victoryScreen.classList.add("hidden");
+  this.gameScreen   .classList.remove("hidden");
+
+  // 9) reset score/progress & render
+  this.scoreDisp.textContent    = udata.score;
+  this.progressFill.style.width = "0%";
+  this._renderQuiz();
+
+  // optional debug info
+  console.log(
+    "✏️ startQuiz:",
+    "pool=", poolWords.length,
+    "carry=", carry.length,
+    "new=", pickNew.length,
+    "round=", roundWords.length,
+    roundWords
+  );
+}
+
 
 
 
