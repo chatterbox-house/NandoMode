@@ -371,7 +371,7 @@ startQuiz() {
       setTimeout(()=>this.finishQuiz(), 300);
     }
     _handleCorrect(div, word) 
-  const u = this.users[this.currentUser];
+const udata = this.users[this.currentUser];
 
   // … your existing score++ / mastered[word]++ …
 
