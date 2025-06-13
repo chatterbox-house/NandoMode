@@ -474,7 +474,7 @@ window.vocab = [
   { "emoji": "🧑‍🎓", "word": "alumno", "type": "noun" },
   { "emoji": "🧑‍🎤", "word": "actor", "type": "noun" },
   { "emoji": "🧑‍🏭", "word": "operario", "type": "noun" },
-  { "emoji": "🧑‍✈️", "word": "capitán", "type": "noun" }
+  { "emoji": "🧑‍✈️", "word": "capitán", "type": "noun" },
   { "emoji": "🚗", "word": "coche", "type": "noun" },
   { "emoji": "📚", "word": "libro", "type": "noun" },
   { "emoji": "⚽", "word": "pelota", "type": "noun" },
@@ -555,7 +555,7 @@ window.vocab = [
   { "emoji": "🪦", "word": "lápida", "type": "noun" },
   { "emoji": "🪳", "word": "cucaracha", "type": "noun" },
   { "emoji": "🪰", "word": "mosca", "type": "noun" },
-  { "emoji": "🕸️", "word": "telaraña", "type": "noun" }
+  { "emoji": "🕸️", "word": "telaraña", "type": "noun" },
   { "emoji": "🏠", "word": "casa", "type": "noun" },
   { "emoji": "🏫", "word": "escuela", "type": "noun" },
   { "emoji": "🏖️", "word": "playa", "type": "noun" },
@@ -625,7 +625,7 @@ window.vocab = [
   { "emoji": "🛒", "word": "mercado", "type": "noun" },
   { "emoji": "🎢", "word": "montaña rusa", "type": "noun" },
   { "emoji": "🪝", "word": "garaje", "type": "noun" },
-  { "emoji": "🪟", "word": "balcón", "type": "noun" }
+  { "emoji": "🪟", "word": "balcón", "type": "noun" },
   { "emoji": "⚽", "word": "fútbol", "type": "noun" },
   { "emoji": "🏀", "word": "baloncesto", "type": "noun" },
   { "emoji": "🏐", "word": "voleibol", "type": "noun" },
@@ -694,7 +694,7 @@ window.vocab = [
   { "emoji": "⚽", "word": "jugar fútbol", "type": "verb" },
   { "emoji": "🏀", "word": "jugar baloncesto", "type": "verb" },
   { "emoji": "🥊", "word": "boxear", "type": "verb" },
-  { "emoji": "🤺", "word": "esgrimir", "type": "verb" }
+  { "emoji": "🤺", "word": "esgrimir", "type": "verb" },
   { "emoji": "☀️", "word": "día", "type": "noun" },
   { "emoji": "🌙", "word": "noche", "type": "noun" },
   { "emoji": "🌞", "word": "mañana", "type": "noun" },
