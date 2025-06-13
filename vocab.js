@@ -274,7 +274,7 @@ window.vocab = [
   { "emoji": "🟨", "word": "ámbar", "type": "adjective" },
   { "emoji": "🟪", "word": "púrpura", "type": "adjective" },
   { "emoji": "🟫", "word": "café", "type": "adjective" },
-  { "emoji": "🟦", "word": "añil", "type": "adjective" }
+  { "emoji": "🟦", "word": "añil", "type": "adjective" },
   { "emoji": "😄", "word": "feliz", "type": "adjective" },
   { "emoji": "😊", "word": "contento", "type": "adjective" },
   { "emoji": "😢", "word": "triste", "type": "adjective" },
