@@ -70,6 +70,7 @@ class SpanishVocabTrainer {
     this.continueBtn  .onclick = () => this._gameToLobby();
     this.quitVictoryBtn.onclick = () => this._gameToLobby();
     this.themeToggle  .onclick = () => this._toggleTheme();
+     this.registerBtn.onclick = () => this._registerUser();
   }
 
   /* ───── Audio Setup ───────────────────────────────────────── */
