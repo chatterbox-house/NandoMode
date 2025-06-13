@@ -2,6 +2,7 @@ class SpanishVocabTrainer {
   constructor() {
     // 1) preset users
     this.users = {
+      Guest:   { pin:"",    score:0, mastered:{}, lastWords:[], lastCorrect:[] },
       Tony:   { pin:"1984", score:0, mastered:{}, lastWords:[], lastCorrect:[] },
       Mina:   { pin:"1982", score:0, mastered:{}, lastWords:[], lastCorrect:[] },
       Sorato: { pin:"2014", score:0, mastered:{}, lastWords:[], lastCorrect:[] },
@@ -60,18 +61,20 @@ class SpanishVocabTrainer {
     this.quitVictoryBtn  = $("quitVictoryBtn");
 
     this.themeToggle     = $("themeToggle");
-   }
+    this._populateUserSelect();
+  }
 
   _populateUserSelect() {
-    // wipe out any old user options except the first two
+    // start fresh
     this.userSelect.innerHTML = `
       <option value="">— Selecciona usuario —</option>
-      <option value="Guest">Invitado</option>
     `;
+    // now add Guest + all named users:
     Object.keys(this.users).forEach(u => {
       const opt = document.createElement("option");
       opt.value = u;
-      opt.textContent = u;
+      // show “Invitado” instead of “Guest”
+      opt.textContent = u === "Guest" ? "Invitado" : u;
       this.userSelect.appendChild(opt);
     });
   }
