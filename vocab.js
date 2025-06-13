@@ -1,7 +1,6 @@
 // vocab.js
 // IMPORTANT: it must assign into window.vocab
 window.vocab = [
-[
   { "emoji": "🏃", "word": "correr", "type": "verb" },
   { "emoji": "🍽️", "word": "comer", "type": "verb" },
   { "emoji": "🎤", "word": "cantar", "type": "verb" },
