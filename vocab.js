@@ -324,7 +324,7 @@ window.vocab = [
   { "emoji": "😉", "word": "juguetón", "type": "adjective" },
   { "emoji": "🥳", "word": "festivo", "type": "adjective" },
   { "emoji": "❤️", "word": "amor", "type": "noun" },
-  { "emoji": "💔", "word": "desamor", "type": "noun" }
+  { "emoji": "💔", "word": "desamor", "type": "noun" },
   { "emoji": "🍎", "word": "manzana", "type": "noun" },
   { "emoji": "🍕", "word": "pizza", "type": "noun" },
   { "emoji": "💧", "word": "agua", "type": "noun" },
